@@ -7,10 +7,14 @@ namespace CedarStation.Gameplay
 {
     public sealed class GameScope : MonoBehaviour, IContainerScope
     {
+        public static GameScope Instance { get; private set; }
         public Container Container { get; private set; }
 
+        private bool _isInitialized;
+        
         private void Awake()
         {
+            Instance = this;
             Initialize(new CedarLogger());
         }
 
@@ -21,6 +25,9 @@ namespace CedarStation.Gameplay
         
         public void Initialize(ICedarLogger logger)
         {
+            if (_isInitialized)
+                return;
+            
             try
             {
                 logger.Info(LogTag.Default, $"Running {Application.productName} v{Application.version}...");
@@ -33,6 +40,7 @@ namespace CedarStation.Gameplay
                     Container.Inject(instance);
                 
                 Container.Initialize();
+                _isInitialized = true;
                 logger.Success(LogTag.Container, "Container initialized!");
             }
             catch (Exception e)

@@ -6,7 +6,7 @@ namespace CedarStation.Helpers
 {
     public sealed class CedarLogger : ICedarLogger
     {
-        public enum OperationResult
+        private enum OperationResult
         {
             Success = 0,
             Fail = 1,

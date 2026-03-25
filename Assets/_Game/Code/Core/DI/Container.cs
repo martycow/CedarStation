@@ -16,10 +16,25 @@ namespace CedarStation.Core.DI
         
         private readonly ICedarLogger _logger;
         
+        private readonly Dictionary<Type, (ConstructorInfo Ctor, ParameterInfo[] Params)> _constructorCache = new();
+        private readonly Dictionary<Type, (MethodInfo Method, ParameterInfo[] Params)[]> _injectCache = new();
+        
         public Container(IEnumerable<DependencyInfo> entries, ICedarLogger logger)
         {
             foreach (var entry in entries)
-                _registered.Add(entry.ContractType, entry);
+            {
+                _registered[entry.ContractType] = entry;
+                
+                if (entry.Instance != null)
+                    continue;
+
+                var ctor = entry.ImplementationType
+                    .GetConstructors()
+                    .OrderByDescending(c => c.GetParameters().Length)
+                    .First();
+
+                _constructorCache[entry.ImplementationType] = (ctor, ctor.GetParameters());
+            }
 
             _logger = logger;
         }
@@ -72,15 +87,23 @@ namespace CedarStation.Core.DI
         
         public void Inject(object target)
         {
-            var methods = target.GetType()
-                .GetMethods((BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-                .Where(m => m.GetCustomAttribute<Inject>() != null);
+            var targetType = target.GetType();
+
+            if (_injectCache.TryGetValue(targetType, out var methods) == false)
+            {
+                methods = targetType
+                    .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .Where(m => m.GetCustomAttribute<Inject>() != null)
+                    .Select(m => (m, m.GetParameters()))
+                    .ToArray();
+                _injectCache[targetType] = methods;
+            }
 
             try
             {
-                foreach (var methodInfo in methods)
+                foreach (var (methodInfo, paramInfos) in methods)
                 {
-                    var parameters = methodInfo.GetParameters()
+                    var parameters = paramInfos
                         .Select(p => Resolve(p.ParameterType))
                         .ToArray();
                 
@@ -110,13 +133,9 @@ namespace CedarStation.Core.DI
 
             try
             {
-                var constructor = entry.ImplementationType
-                    .GetConstructors()
-                    .OrderByDescending(c => c.GetParameters().Length)
-                    .First();
+                var (constructor, paramInfos) = _constructorCache[entry.ImplementationType];
 
-                var parameters = constructor
-                    .GetParameters()
+                var parameters = paramInfos
                     .Select(p => Resolve(p.ParameterType))
                     .ToArray();
 

@@ -6,46 +6,45 @@ namespace CedarStation.Input
 {
     public class InputManager : MonoBehaviour, InputSystem_Actions.IPlayerActions
     {
-        private InputSystem_Actions inputActions;
-        private InputSystem_Actions.PlayerActions playerActionMap;
+        private InputSystem_Actions _inputActions;
+        private InputSystem_Actions.PlayerActions _playerActionMap;
         
         private void Awake()
         {
-            inputActions = new InputSystem_Actions();
-            playerActionMap = inputActions.Player;
-            playerActionMap.AddCallbacks(this);
-            inputActions.Enable();
+            _inputActions = new InputSystem_Actions();
+            _playerActionMap = _inputActions.Player;
+            _playerActionMap.AddCallbacks(this);
+            _inputActions.Enable();
         }
 
         private void OnEnable()
         {
-            playerActionMap.Enable();
+            _playerActionMap.Enable();
         }
 
         private void OnDisable()
         {
-            playerActionMap.Disable();
+            _playerActionMap.Disable();
         }
 
         private void OnDestroy()
         {
-            inputActions.Dispose();
+            _inputActions.Dispose();
         }
 
         public void OnMove(InputAction.CallbackContext context)
         {
-            
             context.ReadValue<Vector2>();
         }
 
         public void OnLook(InputAction.CallbackContext context)
         {
-            throw new NotImplementedException();
+            context.ReadValue<Vector2>();
         }
 
         public void OnInteract(InputAction.CallbackContext context)
         {
-            throw new NotImplementedException();
+            context.ReadValueAsButton();
         }
     }
 }
