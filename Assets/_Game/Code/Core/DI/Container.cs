@@ -8,17 +8,20 @@ namespace CedarStation.Core.DI
 {
     public sealed class Container : IDisposable
     {
-        private readonly Dictionary<Type, DependencyInfo> registered = new();
-        private readonly HashSet<Type> resolving = new();
-        private readonly List<IDisposable> disposables = new();
-        private readonly ILogger logger;
+        private readonly Dictionary<Type, DependencyInfo> _registered = new();
+        private readonly HashSet<Type> _resolving = new();
         
-        public Container(IEnumerable<DependencyInfo> entries, ILogger logger)
+        private readonly List<IInitializable>  _initializers = new();
+        private readonly List<IDisposable> _disposables = new();
+        
+        private readonly ICedarLogger _logger;
+        
+        public Container(IEnumerable<DependencyInfo> entries, ICedarLogger logger)
         {
             foreach (var entry in entries)
-                registered.Add(entry.ContractType, entry);
+                _registered.Add(entry.ContractType, entry);
 
-            this.logger = logger;
+            _logger = logger;
         }
 
         public T Resolve<T>()
@@ -29,11 +32,44 @@ namespace CedarStation.Core.DI
             }
             catch (Exception e)
             {
-                logger.Error($"Error resolving {typeof(T).Name}: {e.Message}", LogType.Container);
+                _logger.Error(LogTag.Container, $"Error resolving {typeof(T).Name}: {e.Message}");
                 throw;
             }
         }
 
+        public void Initialize()
+        {
+            for (var i = 0; i < _initializers.Count; i++)
+            {
+                try
+                {
+                    _initializers[i].Initialize();
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(LogTag.Container, $"Error initializing {_initializers[i].GetType().Name}: {e.Message}.");
+                }
+            }
+        }
+
+        public void Dispose()
+        {
+            for (var i = _disposables.Count - 1; i >= 0; i--)
+            {
+                try
+                {
+                    _disposables[i].Dispose();
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(LogTag.Container, $"Error disposing {_disposables[i].GetType().Name}: {e.Message}.");
+                }
+            }
+            
+            _disposables.Clear();
+            _registered.Clear();
+        }
+        
         public void Inject(object target)
         {
             var methods = target.GetType()
@@ -53,26 +89,23 @@ namespace CedarStation.Core.DI
             }
             catch (Exception e)
             {
-                logger.Error($"Error injecting dependencies into {target.GetType().Name}: {e.Message}", LogType.Container);
+                _logger.Error(LogTag.Container, $"Error injecting dependencies into {target.GetType().Name}: {e.Message}");
                 throw;
             }
         }
-
+        
         private object Resolve(Type type)
         {
-            if (!registered.TryGetValue(type, out var entry))
-            {
-                logger.Error($"Type {type} is not registered in the container.", LogType.Container);
-                return null;
-            }
+            if (_registered.TryGetValue(type, out var entry) == false)
+                throw new InvalidOperationException($"Type {type} is not registered in the container.");
 
             if (entry.Lifetime == Lifetime.Singleton && entry.Instance != null)
                 return entry.Instance;
 
-            if (!resolving.Add(type))
+            if (_resolving.Add(type) == false)
             {
-                var cycle = string.Join(" -> ", resolving.Select(t => t.Name));
-                logger.Error($"Circular dependency detected: {cycle} -> {type.Name}", LogType.Container);
+                var cycle = string.Join(" -> ", _resolving.Select(t => t.Name));
+                throw new InvalidOperationException($"Circular dependency detected: {cycle} -> {type.Name}");
             }
 
             try
@@ -89,36 +122,25 @@ namespace CedarStation.Core.DI
 
                 var instance = constructor.Invoke(parameters);
 
-                if (instance is IDisposable disposable)
-                    disposables.Add(disposable);
+                switch (instance)
+                {
+                    case IDisposable disposable:
+                        _disposables.Add(disposable);
+                        break;
+                    case IInitializable initializable:
+                        _initializers.Add(initializable);
+                        break;
+                }
 
                 if (entry.Lifetime == Lifetime.Singleton)
-                    entry.SetInstance(instance, logger);
+                    entry.SetInstance(instance);
 
                 return instance;
             }
             finally
             {
-                resolving.Remove(type);
+                _resolving.Remove(type);
             }
-        }
-
-        public void Dispose()
-        {
-            for (var i = disposables.Count - 1; i >= 0; i--)
-            {
-                try
-                {
-                    disposables[i].Dispose();
-                }
-                catch (Exception e)
-                {
-                    logger.Error($"Error disposing {disposables[i].GetType().Name}: {e.Message}", LogType.Container);
-                }
-            }
-            
-            disposables.Clear();
-            registered.Clear();
         }
     }
 }

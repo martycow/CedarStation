@@ -11,28 +11,31 @@ namespace CedarStation.Core.DI
         
         public object Instance { get; private set; }
         
-        public DependencyInfo(Type contract, Type implementation, Lifetime lifetime)
+        private readonly ICedarLogger _logger;
+
+        public DependencyInfo(Type contract, Type implementation, Lifetime lifetime, ICedarLogger logger)
         {
             ContractType = contract;
             ImplementationType = implementation;
             Lifetime = lifetime;
+            _logger = logger;
         }
         
-        public void SetInstance(object instance, ILogger logger)
+        public void SetInstance(object instance)
         {
             if (Lifetime != Lifetime.Singleton)
             {
-                logger.Error("Lifetime must be singleton", LogType.Container);
+                _logger.Error(LogTag.Container, "Lifetime must be singleton.");
                 return;
             }
 
-            if (Instance != null)
+            if (Instance == null)
             {
-                logger.Error("Instance already set", LogType.Container);
+                Instance = instance;
                 return;
             }
             
-            Instance = instance;
+            _logger.Error(LogTag.Container,"Instance already set.");
         }
     }
 }

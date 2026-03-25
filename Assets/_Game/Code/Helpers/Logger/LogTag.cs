@@ -1,6 +1,6 @@
 ﻿namespace CedarStation.Helpers
 {
-    public enum LogType
+    public enum LogTag
     {
         Default = 0,
         Container = 1,
