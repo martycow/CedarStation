@@ -9,8 +9,8 @@ namespace CedarStation.Gameplay
     {
         public Container Container { get; private set; }
 
-        private Logger logger;
-        public Logger Logger => logger ?? new Logger();
+        public static Logger Logger => logger ?? new Logger();
+        private static Logger logger;
 
         private void Awake()
         {

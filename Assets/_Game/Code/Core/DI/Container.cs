@@ -40,13 +40,21 @@ namespace CedarStation.Core.DI
                 .GetMethods((BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                 .Where(m => m.GetCustomAttribute<Inject>() != null);
 
-            foreach (var methodInfo in methods)
+            try
             {
-                var parameters = methodInfo.GetParameters()
-                    .Select(p => Resolve(p.ParameterType))
-                    .ToArray();
+                foreach (var methodInfo in methods)
+                {
+                    var parameters = methodInfo.GetParameters()
+                        .Select(p => Resolve(p.ParameterType))
+                        .ToArray();
                 
-                methodInfo.Invoke(target, parameters);
+                    methodInfo.Invoke(target, parameters);
+                }
+            }
+            catch (Exception e)
+            {
+                logger.Error($"Error injecting dependencies into {target.GetType().Name}: {e.Message}", LogType.Container);
+                throw;
             }
         }
 
@@ -106,7 +114,6 @@ namespace CedarStation.Core.DI
                 catch (Exception e)
                 {
                     logger.Error($"Error disposing {disposables[i].GetType().Name}: {e.Message}", LogType.Container);
-                    throw;
                 }
             }
             
