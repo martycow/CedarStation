@@ -1,4 +1,5 @@
 ﻿using System;
+using CedarStation.Helpers;
 
 namespace CedarStation.Core.DI
 {
@@ -17,13 +18,19 @@ namespace CedarStation.Core.DI
             Lifetime = lifetime;
         }
         
-        public void SetInstance(object instance)
+        public void SetInstance(object instance, ILogger logger)
         {
             if (Lifetime != Lifetime.Singleton)
-                throw new InvalidOperationException("Lifetime must be singleton");
+            {
+                logger.Error("Lifetime must be singleton", LogType.Container);
+                return;
+            }
 
             if (Instance != null)
-                throw new InvalidOperationException("Instance is already set");
+            {
+                logger.Error("Instance already set", LogType.Container);
+                return;
+            }
             
             Instance = instance;
         }

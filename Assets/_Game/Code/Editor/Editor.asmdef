@@ -1,11 +1,12 @@
 {
     "name": "Editor",
-    "rootNamespace": "",
+    "rootNamespace": "Editor",
     "references": [
         "GUID:27bcd3470e3e3bd4686fb4aa7132259a",
         "GUID:187f2ff3beef3c3489c3d624049579de",
         "GUID:e22c5cfe693d2884bb005c215adab40d",
-        "GUID:54f7fa88bfff902439d137d3ace0e50e"
+        "GUID:54f7fa88bfff902439d137d3ace0e50e",
+        "GUID:e81e6fd1865749c4296a092466fecf04"
     ],
     "includePlatforms": [
         "Editor"

@@ -1,7 +1,9 @@
 {
     "name": "CedarStation.Core",
     "rootNamespace": "CedarStation.Core",
-    "references": [],
+    "references": [
+        "GUID:e81e6fd1865749c4296a092466fecf04"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
