@@ -10,10 +10,10 @@ namespace Game.General
         private static readonly Dictionary<SystemTag, Color> LogColors = new()
         {
             { SystemTag.Application, Color.white },
-            { SystemTag.Container, Color.darkGoldenRod },
-            { SystemTag.Input, Color.darkGray },
-            { SystemTag.EventBus, Color.lawnGreen },
-            { SystemTag.Gameplay, Color.dodgerBlue },
+            { SystemTag.Container, Color.bisque },
+            { SystemTag.Input, Color.chocolate },
+            { SystemTag.EventBus, Color.dodgerBlue },
+            { SystemTag.Gameplay, Color.lawnGreen },
             { SystemTag.Audio, Color.aquamarine },
             { SystemTag.Inventory, Color.deepPink },
             { SystemTag.Dialogue, Color.darkSalmon },
@@ -121,8 +121,10 @@ namespace Game.General
                 return $"[{primaryTag}] {message}";
             
             var builder = MainThreadBuilder.Get();
+            builder.Append("<b>");
             builder.AppendFormat("<color=#{0}>[{1}]</color> ", colorScheme.PrimaryColorHex, primaryTag);
             builder.AppendFormat("<color=#{0}>{1}</color>", colorScheme.SecondaryColorHex, message);
+            builder.Append("</b>");
             return builder.ToString();
         }
 
@@ -133,9 +135,11 @@ namespace Game.General
 
             var builder = MainThreadBuilder.Get();
             
+            builder.Append("<b>");
+            
             //"[Tag]"
-            builder.AppendFormat("<color=#{0}><b>", colorScheme.PrimaryColorHex);
-            builder.AppendFormat("[{0}]</b></color>", tag);
+            builder.AppendFormat("<color=#{0}>", colorScheme.PrimaryColorHex);
+            builder.AppendFormat("[{0}]</color>", tag);
             
             //" [Result]"
             builder.Append(' ');
@@ -145,6 +149,9 @@ namespace Game.General
             // " Message"
             builder.Append(' ');
             builder.AppendFormat("{0}</color>", message);
+            
+            builder.Append("</b>");
+            
             return builder.ToString();
         }
 

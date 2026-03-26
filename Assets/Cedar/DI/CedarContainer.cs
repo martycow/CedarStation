@@ -41,6 +41,13 @@ namespace Cedar.Core
         public void Initialize()
         {
             _logger.Info(SystemTag.Container, $"Initializing ({_dependencyMap.Count})...");
+
+            foreach (var dependency in _dependencyMap.Values)
+            {
+                if (dependency.Lifetime == DependencyLifetime.Singleton && dependency.SingletonInstance == null)
+                    Resolve(dependency.ContractType);
+            }
+
             foreach (var t in _initializers)
             {
                 try
@@ -164,18 +171,28 @@ namespace Cedar.Core
                     .ToArray();
 
                 var instance = ctorInfo.Invoke(args);
-                switch (instance)
-                {
-                    case IDisposable disposable:
-                        _disposables.Add(disposable);
-                        break;
-                    case IInitializable initializable:
-                        _initializers.Add(initializable);
-                        break;
-                }
+                
+                if (instance is IDisposable disposable)
+                    _disposables.Add(disposable);
+                
+                if (instance is IInitializable initializable)
+                    _initializers.Add(initializable);
 
                 if (entry.Lifetime == DependencyLifetime.Singleton)
+                {
                     entry.SetSingletonInstance(instance);
+
+                    foreach (var other in _dependencyMap.Values)
+                    {
+                        if (other != entry
+                            && other.ImplementationType == entry.ImplementationType
+                            && other.Lifetime == DependencyLifetime.Singleton
+                            && other.SingletonInstance == null)
+                        {
+                            other.SetSingletonInstance(instance);
+                        }
+                    }
+                }
 
                 return instance;
             }
