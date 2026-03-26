@@ -1,0 +1,16 @@
+{
+    "name": "Game.General",
+    "rootNamespace": "Game.General",
+    "references": [
+        "GUID:27bcd3470e3e3bd4686fb4aa7132259a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
