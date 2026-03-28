@@ -1,84 +1,46 @@
-﻿using System;
-using Cedar.Core;
+﻿using Cedar.Core;
 using Game.General;
-using Game.Input;
 using UnityEngine;
 
 namespace Game.Gameplay
 {
     public sealed class GameScope : MonoSingleton, IContainerScope
     {
-        [SerializeField] private LoggerSettings loggerSettings;
+        public ICedarContainer RootContainer { get; private set; }
         
-        public ICedarContainer CedarContainer { get; private set; }
-
-        private bool _isInitialized;
-        private InputActions _inputActions;
-
         protected override void AwakeImpl()
         {
-            Initialize(new CedarLogger(loggerSettings));
+            var appScope = FindAnyObjectByType<ApplicationScope>();
+            var logger = appScope.RootContainer.Resolve<ICedarLogger>();
+            
+            Initialize(logger, appScope.RootContainer);
         }
 
         private void OnDestroy()
         {
             Dispose();
         }
-        
-        public void Initialize(ICedarLogger logger)
-        {
-            if (_isInitialized)
-                return;
-            
-            _inputActions = new InputActions();
 
-            logger.Info(SystemTag.Application, $"Starting {Application.productName} v{Application.version}...");
-            
-            CedarContainer = CreateBuilder(logger).Build();
-                
-            // Injecting dependencies into MonoBehaviours
-            var allInstancedMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
-            foreach (var instance in allInstancedMonoBehaviours)
-                CedarContainer.Inject(instance);
-                
-            // Triggering initialization
-            CedarContainer.Initialize();
-            _isInitialized = true;
-            
-            logger.Success(SystemTag.Application, $"{Application.productName} started.");
-        }
-        
         public void Dispose()
         {
-            _inputActions?.Dispose();
-            CedarContainer?.Dispose();
+            RootContainer?.Dispose();
         }
 
-        private CedarContainerBuilder CreateBuilder(ICedarLogger logger)
+        private void Initialize(ICedarLogger logger, ICedarContainer parent)
         {
-            var builder = new CedarContainerBuilder(logger);
-            
-            builder.RegisterInstance(logger);
-            builder.RegisterInstance(_inputActions);
-            builder.Register<EventBus>();
+            var builder = new CedarContainerBuilder(logger, parent);
 
-            // Gameplay controls
-            builder.Register<GameplayInputState>();
-            builder.Register<IGameplayInputEvents, GameplayInputState>();
-
-            // Menu controls
-            builder.Register<MenuInputState>();
-            builder.Register<IMenuInputEvents, MenuInputState>();
-            
-            // No control mode
-            builder.Register<NoControlState>();
-            
-            builder.Register<IInputManager, InputManager>();
-            
             // Player management
             builder.Register<PlayerController>();
             
-            return builder;
+            RootContainer = builder.Build();
+            
+            // Injecting dependencies into MonoBehaviours
+            var monoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+            foreach (var instance in monoBehaviours)
+                RootContainer.Inject(instance);
+            
+            RootContainer.Initialize();
         }
     }
 }

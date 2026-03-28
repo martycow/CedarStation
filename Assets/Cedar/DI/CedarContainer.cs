@@ -7,6 +7,8 @@ namespace Cedar.Core
 {
     public sealed class CedarContainer : ICedarContainer
     {
+        private readonly ICedarContainer? _parent;
+        
         private readonly Dictionary<Type, IDependency> _dependencyMap = new();
         private readonly HashSet<Type> _resolving = new();
         
@@ -18,9 +20,10 @@ namespace Cedar.Core
         private readonly Dictionary<Type, (ConstructorInfo Ctor, ParameterInfo[] Params)> _constructorCache = new();
         private readonly Dictionary<Type, (MethodInfo Method, ParameterInfo[] Params)[]> _injectCache = new();
         
-        public CedarContainer(IEnumerable<IDependency> dependencies, ICedarLogger logger)
+        public CedarContainer(IEnumerable<IDependency> dependencies, ICedarLogger logger, ICedarContainer? parent = null)
         {
             _logger = logger;
+            _parent = parent;
             
             logger.Info(SystemTag.Container, "Registering dependencies...");
             foreach (var dependency in dependencies)
@@ -148,10 +151,15 @@ namespace Cedar.Core
             _constructorCache[dependency.ImplementationType] = (ctor, ctor.GetParameters());
         }
         
-        private object Resolve(Type type)
+        public object Resolve(Type type)
         {
             if (!_dependencyMap.TryGetValue(type, out var entry))
+            {
+                if(_parent != null)
+                    return _parent.Resolve(type);
+                
                 throw new InvalidOperationException($"Type {type} is not registered in the container.");
+            }
 
             if (entry.Lifetime == DependencyLifetime.Singleton && entry.SingletonInstance != null)
                 return entry.SingletonInstance;

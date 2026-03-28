@@ -25,6 +25,11 @@ namespace Cedar.Core
             return default;
         }
 
+        public object Resolve(Type type)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Inject(object target)
         {
             

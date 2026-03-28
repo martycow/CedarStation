@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Editor
 {
-    [CustomEditor(typeof(GameScope))]
+    [CustomEditor(typeof(ApplicationScope))]
     public sealed class GameScopeEditor : UnityEditor.Editor
     {
         private static readonly Color ColorSingleton = new(0.75f, 0.5f, 1f, 1f);
@@ -34,7 +34,7 @@ namespace Editor
         {
             DrawDefaultInspector();
 
-            var scope = (GameScope)target;
+            var scope = (ApplicationScope)target;
 
             // Title
             EditorGUILayout.Space(10);
@@ -43,13 +43,13 @@ namespace Editor
             EditorGUILayout.LabelField("Cedar Container", EditorStyles.boldLabel);
             
             // Info Message
-            if (!Application.isPlaying || scope.CedarContainer == null)
+            if (!Application.isPlaying || scope.RootContainer == null)
             {
                 EditorGUILayout.HelpBox("Container is not initialized. Enter Play Mode to inspect dependencies.", MessageType.Info);
                 return;
             }
 
-            var dependencies = scope.CedarContainer.GetRegisteredDependencies();
+            var dependencies = scope.RootContainer.GetRegisteredDependencies();
             
             // Status Bar
             DrawStatusBar(dependencies);

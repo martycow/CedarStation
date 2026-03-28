@@ -8,10 +8,12 @@ namespace Cedar.Core
         
         private readonly List<IDependency> _dependencies = new();
         private readonly ICedarLogger _logger;
+        private readonly ICedarContainer _parent;
 
-        public CedarContainerBuilder(ICedarLogger cedarLogger)
+        public CedarContainerBuilder(ICedarLogger cedarLogger, ICedarContainer parent = null)
         {
             _logger = cedarLogger;
+            _parent = parent;
         }
 
         public ICedarContainerBuilder Register<T>(DependencyLifetime lifetime = DependencyLifetime.Singleton)
@@ -38,7 +40,7 @@ namespace Cedar.Core
 
         public ICedarContainer Build()
         {
-            return new CedarContainer(_dependencies, _logger);
+            return new CedarContainer(_dependencies, _logger, _parent);
         }
     }
 }

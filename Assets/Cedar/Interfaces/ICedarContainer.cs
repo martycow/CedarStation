@@ -7,6 +7,7 @@ namespace Cedar.Core
     {
         Dictionary<Type, IDependency> GetRegisteredDependencies();
         T Resolve<T>();
+        object Resolve(Type type);
         void Inject(object target);
     }
 }
