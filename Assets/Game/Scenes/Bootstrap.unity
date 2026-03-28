@@ -148,6 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acbae416c6514ed0b9396d7b37da9df0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: CedarStation.Gameplay::CedarStation.Gameplay.Bootstrap
+  loggerSettings: {fileID: 11400000, guid: 1c185cf58597d0d4c89830817ad664d0, type: 2}
 --- !u!4 &394277471
 Transform:
   m_ObjectHideFlags: 0

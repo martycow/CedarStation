@@ -8,6 +8,8 @@ namespace Game.Gameplay
 {
     public sealed class GameScope : MonoSingleton, IContainerScope
     {
+        [SerializeField] private LoggerSettings loggerSettings;
+        
         public ICedarContainer CedarContainer { get; private set; }
 
         private bool _isInitialized;
@@ -15,7 +17,7 @@ namespace Game.Gameplay
 
         protected override void AwakeImpl()
         {
-            Initialize(new CedarLogger());
+            Initialize(new CedarLogger(loggerSettings));
         }
 
         private void OnDestroy()

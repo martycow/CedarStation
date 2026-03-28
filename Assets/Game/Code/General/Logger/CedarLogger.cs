@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Cedar.Core;
 using UnityEngine;
 
@@ -7,34 +6,15 @@ namespace Game.General
 {
     public sealed class CedarLogger : ICedarLogger
     {
-        private static readonly Dictionary<SystemTag, Color> LogColors = new()
-        {
-            { SystemTag.Application, Color.white },
-            { SystemTag.Container, Color.bisque },
-            { SystemTag.Input, Color.chocolate },
-            { SystemTag.EventBus, Color.dodgerBlue },
-            { SystemTag.Gameplay, Color.lawnGreen },
-            { SystemTag.Audio, Color.aquamarine },
-            { SystemTag.Inventory, Color.deepPink },
-            { SystemTag.Dialogue, Color.darkSalmon },
-            { SystemTag.UI, Color.cyan },
-            { SystemTag.AI, Color.magenta },
-        };
-
-        private static readonly Dictionary<SystemTag, LoggerColorScheme> ColorSchemes =
-            LogColors.ToDictionary(
-                kvp => kvp.Key,
-                kvp =>
-                {
-                    var primaryColor = ColorUtility.ToHtmlStringRGB(kvp.Value);
-                    var secondaryColor = ColorUtility.ToHtmlStringRGB(Darken(kvp.Value));
-                    var successColor = ColorUtility.ToHtmlStringRGB(Color.chartreuse);
-                    var failColor = ColorUtility.ToHtmlStringRGB(Color.orangeRed);
-                    return new LoggerColorScheme(primaryColor, secondaryColor, successColor, failColor);
-                });
-        
         private static readonly HashSet<SystemTag> DisabledTypes = new();
         
+        private readonly LoggerSettings _settings; 
+
+        public CedarLogger(LoggerSettings settings)
+        {
+            _settings = settings;
+        }
+
         public void EnableAll()
         {
             DisabledTypes.Clear();
@@ -67,8 +47,11 @@ namespace Game.General
 #if UNITY_EDITOR || DEBUG_BUILD
             if (DisabledTypes.Contains(systemTag))
                 return;
+
+            var primaryColor = _settings.GetPrimaryColor(systemTag);
+            var secondaryColor = Utilities.Colors.Darken(primaryColor);
             
-            var str = BuildString(systemTag, message);
+            var str = BuildString(systemTag, message, primaryColor, secondaryColor);
             Debug.Log(str);
 #endif
         }
@@ -78,8 +61,11 @@ namespace Game.General
 #if UNITY_EDITOR || DEBUG_BUILD
             if (DisabledTypes.Contains(systemTag))
                 return;
+
+            var primaryColor = _settings.WarnColor;
+            var secondaryColor = Utilities.Colors.Darken(primaryColor);
             
-            var str = BuildString(systemTag, warningMessage);
+            var str = BuildString(systemTag, warningMessage, primaryColor, secondaryColor);
             Debug.LogWarning(str);
 #endif
         }
@@ -88,8 +74,11 @@ namespace Game.General
         {
             if (DisabledTypes.Contains(systemTag))
                 return;
+
+            var primaryColor = _settings.ErrorColor;
+            var secondaryColor = Utilities.Colors.Darken(primaryColor);
             
-            var str = BuildString(systemTag, errorMessage);
+            var str = BuildString(systemTag, errorMessage, primaryColor, secondaryColor);
             Debug.LogError(str);
         }
         
@@ -99,7 +88,11 @@ namespace Game.General
             if (DisabledTypes.Contains(systemTag))
                 return;
 
-            var str = BuildOperationResultString(systemTag, OperationResult.Success, message);
+            var primaryColor = _settings.GetPrimaryColor(systemTag);
+            var secondaryColor = Utilities.Colors.Darken(primaryColor);
+            var accentColor = _settings.SuccessColor;
+            
+            var str = BuildOperationResultString(systemTag, OperationResult.Success, message, primaryColor, secondaryColor, accentColor);
             Debug.Log(str);
 #endif
         }
@@ -109,45 +102,51 @@ namespace Game.General
 #if UNITY_EDITOR || DEBUG_BUILD
             if (DisabledTypes.Contains(systemTag))
                 return;
+            
+            var primaryColor = _settings.GetPrimaryColor(systemTag);
+            var secondaryColor = Utilities.Colors.Darken(primaryColor);
+            var accentColor = _settings.FailColor;
 
-            var str = BuildOperationResultString(systemTag, OperationResult.Fail, message);
+            var str = BuildOperationResultString(systemTag, OperationResult.Fail, message, primaryColor, secondaryColor, accentColor);
             Debug.Log(str);
 #endif
         }
 
-        private static string BuildString(SystemTag primaryTag, string message)
+        private static string BuildString(SystemTag systemTag, string message, Color primaryColor, Color secondaryColor)
         {
-            if (ColorSchemes.TryGetValue(primaryTag, out var colorScheme) == false)
-                return $"[{primaryTag}] {message}";
+            var primaryHex = ColorUtility.ToHtmlStringRGB(primaryColor);
+            var secondaryHex = ColorUtility.ToHtmlStringRGB(secondaryColor);
             
             var builder = MainThreadBuilder.Get();
             builder.Append("<b>");
-            builder.AppendFormat("<color=#{0}>[{1}]</color> ", colorScheme.PrimaryColorHex, primaryTag);
-            builder.AppendFormat("<color=#{0}>{1}</color>", colorScheme.SecondaryColorHex, message);
+            builder.AppendFormat("<color=#{0}>[{1}]</color>", primaryHex, systemTag);
             builder.Append("</b>");
+            builder.Append(' ');
+            builder.AppendFormat("<color=#{0}>{1}</color>", secondaryHex, message);
             return builder.ToString();
         }
 
-        private static string BuildOperationResultString(SystemTag tag, OperationResult result, string message)
+        private static string BuildOperationResultString(SystemTag systemTag, OperationResult result, string message, Color primaryColor, Color secondaryColor, Color accentColor)
         {
-            if (ColorSchemes.TryGetValue(tag, out var colorScheme) == false)
-                return $"[{tag}] [{result}] {message}";
-
+            var primaryHex = ColorUtility.ToHtmlStringRGB(primaryColor);
+            var secondaryHex = ColorUtility.ToHtmlStringRGB(secondaryColor);
+            var accentHex = ColorUtility.ToHtmlStringRGB(accentColor);
+                
             var builder = MainThreadBuilder.Get();
             
             builder.Append("<b>");
+            //"[Result]"
+            builder.AppendFormat("<color=#{0}>", accentHex);
+            builder.AppendFormat("[{0}]</color>", result);
             
-            //"[Tag]"
-            builder.AppendFormat("<color=#{0}>", colorScheme.PrimaryColorHex);
-            builder.AppendFormat("[{0}]</color>", tag);
-            
-            //" [Result]"
+            //" [SystemTag]"
             builder.Append(' ');
-            builder.AppendFormat("<color=#{0}>", result == OperationResult.Success ? colorScheme.SuccessColorHex : colorScheme.FailColorHex);
-            builder.AppendFormat("[{0}]", result);
+            builder.AppendFormat("<color=#{0}>", primaryHex);
+            builder.AppendFormat("[{0}]</color>", systemTag);
             
             // " Message"
             builder.Append(' ');
+            builder.AppendFormat("<color=#{0}>", secondaryHex);
             builder.AppendFormat("{0}</color>", message);
             
             builder.Append("</b>");
@@ -155,9 +154,6 @@ namespace Game.General
             return builder.ToString();
         }
 
-        private static Color Darken(Color c, float factor = 0.75f)
-        {
-            return new Color(c.r * factor, c.g * factor, c.b * factor);
-        }
+        
     }
 }
