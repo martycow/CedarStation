@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Editor
 {
     [CustomEditor(typeof(ApplicationScope))]
-    public sealed class GameScopeEditor : UnityEditor.Editor
+    public sealed class ApplicationScopeEditor : UnityEditor.Editor
     {
         private static readonly Color ColorSingleton = new(0.75f, 0.5f, 1f, 1f);
         private static readonly Color ColorTransient = new(0.35f, 0.60f, 0.90f, 1f);
@@ -49,10 +49,8 @@ namespace Editor
                 return;
             }
 
-            var dependencies = scope.RootContainer.GetRegisteredDependencies();
-            
             // Status Bar
-            DrawStatusBar(dependencies);
+            DrawStatusBar(scope.RootContainer.RegisteredDependencies);
             
             EditorGUILayout.Space(4);
             EditorGUILayout.BeginHorizontal();
@@ -64,7 +62,7 @@ namespace Editor
             EditorGUILayout.Space(4);
             
             // Dependency List
-            DrawDependencyList(_filter, dependencies, ref _scrollPos);
+            DrawDependencyList(_filter, scope.RootContainer.RegisteredDependencies, ref _scrollPos);
             
             if (Application.isPlaying)
                 Repaint();

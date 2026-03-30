@@ -15,10 +15,7 @@ namespace Cedar.Core
             
         }
 
-        public Dictionary<Type, IDependency> GetRegisteredDependencies()
-        {
-            return new Dictionary<Type, IDependency>();
-        }
+        Dictionary<Type, IDependency> ICedarContainer.RegisteredDependencies { get; }
 
         public T Resolve<T>()
         {

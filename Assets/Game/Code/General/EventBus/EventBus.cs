@@ -17,7 +17,6 @@ namespace Game.General
         
         public void Initialize()
         {
-            _logger.Success(SystemTag.EventBus, "Initialized.");
         }
 
         public void Dispose()
@@ -27,7 +26,6 @@ namespace Game.General
             
             _handlers.Clear();
             _wrappers.Clear();
-            _logger.Success(SystemTag.EventBus, "Disposed.");
         }
 
         public void Publish<TEvent>(TEvent gameEvent) where TEvent : IGameEvent

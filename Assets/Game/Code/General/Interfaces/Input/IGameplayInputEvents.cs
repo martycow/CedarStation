@@ -6,8 +6,8 @@ namespace Game.General
     public interface IGameplayInputEvents
     {
         event Action<Vector2> MoveStarted;
-        event Action<Vector2> Move;
-        event Action<Vector2> MoveEnded;
+        event Action<Vector2> MovePerformed;
+        event Action<Vector2> MoveCanceled;
         
         event Action<Vector2> MoveCamera;
         event Action<float> ZoomCamera;

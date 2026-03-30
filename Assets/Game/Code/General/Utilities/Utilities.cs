@@ -4,6 +4,11 @@ namespace Game.General
 {
     public static class Utilities
     {
+        public static class Vectors
+        {
+            
+        }
+
         public static class Colors
         {
             public static Color Darken(Color c, float factor = 0.75f)

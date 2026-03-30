@@ -7,9 +7,10 @@ namespace Cedar.Core
 {
     public sealed class CedarContainer : ICedarContainer
     {
-        private readonly ICedarContainer? _parent;
+        public Dictionary<Type, IDependency> RegisteredDependencies { get; } = new();
         
-        private readonly Dictionary<Type, IDependency> _dependencyMap = new();
+        private readonly ICedarContainer? _parent;
+
         private readonly HashSet<Type> _resolving = new();
         
         private readonly List<IInitializable>  _initializers = new();
@@ -19,7 +20,7 @@ namespace Cedar.Core
         
         private readonly Dictionary<Type, (ConstructorInfo Ctor, ParameterInfo[] Params)> _constructorCache = new();
         private readonly Dictionary<Type, (MethodInfo Method, ParameterInfo[] Params)[]> _injectCache = new();
-        
+
         public CedarContainer(IEnumerable<IDependency> dependencies, ICedarLogger logger, ICedarContainer? parent = null)
         {
             _logger = logger;
@@ -28,7 +29,7 @@ namespace Cedar.Core
             logger.Info(SystemTag.Container, "Registering dependencies...");
             foreach (var dependency in dependencies)
             {
-                if (_dependencyMap.TryAdd(dependency.ContractType, dependency))
+                if (RegisteredDependencies.TryAdd(dependency.ContractType, dependency))
                 {
                     _logger.Info(SystemTag.Container, $"Registered {dependency.ContractType.Name} -> {dependency.ImplementationType.Name} ({dependency.Lifetime}).");
                     CacheConstructor(dependency);
@@ -38,14 +39,14 @@ namespace Cedar.Core
                 _logger.Error(SystemTag.Container, $"Type {dependency.ContractType.Name} is already registered.");
             }
             
-            logger.Info(SystemTag.Container, $"Registered {_dependencyMap.Count} dependencies.");
+            logger.Info(SystemTag.Container, $"Registered {RegisteredDependencies.Count} dependencies.");
         }
         
         public void Initialize()
         {
-            _logger.Info(SystemTag.Container, $"Initializing ({_dependencyMap.Count})...");
+            _logger.Info(SystemTag.Container, $"Initializing ({RegisteredDependencies.Count})...");
 
-            foreach (var dependency in _dependencyMap.Values)
+            foreach (var dependency in RegisteredDependencies.Values)
             {
                 if (dependency.Lifetime == DependencyLifetime.Singleton && dependency.SingletonInstance == null)
                     Resolve(dependency.ContractType);
@@ -57,13 +58,15 @@ namespace Cedar.Core
                 {
                     _logger.Info(SystemTag.Container, $"Initializing {t.GetType().Name}...");
                     t.Initialize();
+                    _logger.Success(SystemTag.Container, $"{t.GetType().Name} initialized.");
+
                 }
                 catch (Exception e)
                 {
                     _logger.Fail(SystemTag.Container, $"Error initializing {t.GetType().Name}: {e.Message}.");
                 }
             }
-            _logger.Success(SystemTag.Container, "Initialized.");
+            _logger.Success(SystemTag.Container, "Cedar Container Initialized!");
         }
 
         public void Dispose()
@@ -71,9 +74,12 @@ namespace Cedar.Core
             _logger.Info(SystemTag.Container, "Disposing...");
             for (var i = _disposables.Count - 1; i >= 0; i--)
             {
+                var t = _disposables[i];
                 try
                 {
+                    _logger.Info(SystemTag.Container, $"Disposing {t.GetType().Name}...");
                     _disposables[i].Dispose();
+                    _logger.Success(SystemTag.Container, $"{t.GetType().Name} disposed.");
                 }
                 catch (Exception e)
                 {
@@ -82,8 +88,8 @@ namespace Cedar.Core
             }
             
             _disposables.Clear();
-            _dependencyMap.Clear();
-            _logger.Success(SystemTag.Container, "Disposed.");
+            RegisteredDependencies.Clear();
+            _logger.Success(SystemTag.Container, "Cedar Container Disposed!");
         }
 
         public T Resolve<T>()
@@ -133,11 +139,6 @@ namespace Cedar.Core
             }
         }
         
-        public Dictionary<Type, IDependency> GetRegisteredDependencies()
-        {
-            return _dependencyMap;
-        }
-        
         private void CacheConstructor(IDependency dependency)
         {
             if (dependency.SingletonInstance != null)
@@ -153,7 +154,7 @@ namespace Cedar.Core
         
         public object Resolve(Type type)
         {
-            if (!_dependencyMap.TryGetValue(type, out var entry))
+            if (!RegisteredDependencies.TryGetValue(type, out var entry))
             {
                 if(_parent != null)
                     return _parent.Resolve(type);
@@ -190,7 +191,7 @@ namespace Cedar.Core
                 {
                     entry.SetSingletonInstance(instance);
 
-                    foreach (var other in _dependencyMap.Values)
+                    foreach (var other in RegisteredDependencies.Values)
                     {
                         if (other != entry
                             && other.ImplementationType == entry.ImplementationType

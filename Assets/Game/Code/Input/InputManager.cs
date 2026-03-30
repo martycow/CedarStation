@@ -35,19 +35,13 @@ namespace Game.Input
             foreach (var (_, state) in States)
                 state.OnDeviceChanged += DeviceChangeHandler;
             
-            SetState(InputStateType.NoControl);
-            
-            _logger.Success(SystemTag.Input, "InputManager initialized successfully.");
+            SetState(InputStateType.Gameplay);
         }
 
         public void Dispose()
         {
-            _logger.Info(SystemTag.Input, "Disposing InputManager...");
-
             foreach (var (_, state) in States)
                 state.OnDeviceChanged -= DeviceChangeHandler;
-            
-            _logger.Success(SystemTag.Input, "InputManager disposed successfully.");
         }
 
         public void SetState(InputStateType stateType)

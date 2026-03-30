@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f5b7ffae654e42c0aa49e8ca1568b844, type: 3}
-  m_Name: Logger Settings
+  m_Name: Settings_Logger
   m_EditorClassIdentifier: Game.General::Game.General.LoggerSettings
   primaryColors:
   - {r: 0.831, g: 0.831, b: 0.847, a: 1}

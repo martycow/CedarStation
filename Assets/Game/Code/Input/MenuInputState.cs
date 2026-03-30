@@ -22,8 +22,6 @@ namespace Game.Input
         {
             InputActions.Menu.SetCallbacks(this);
             Disable();
-            
-            Logger.Success(SystemTag.Input, $"Initialized {StateType} Input State.");
         }
 
         public override void Dispose()

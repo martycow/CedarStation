@@ -12,8 +12,8 @@ namespace Game.Input
         InputActions.IActionsActions
     {
         public event Action<Vector2> MoveStarted;
-        public event Action<Vector2> Move;
-        public event Action<Vector2> MoveEnded;
+        public event Action<Vector2> MovePerformed;
+        public event Action<Vector2> MoveCanceled;
         public event Action<Vector2> MoveCamera;
         public event Action<float> ZoomCamera;
         public event Action Jump;
@@ -33,8 +33,6 @@ namespace Game.Input
             InputActions.View.SetCallbacks(this);
             InputActions.Actions.SetCallbacks(this);
             Disable();
-            
-            Logger.Success(SystemTag.Input, $"Initialized {StateType} Input State.");
         }
 
         public override void Dispose()
@@ -66,16 +64,16 @@ namespace Game.Input
             switch (context.phase)
             {
                 case InputActionPhase.Started:
-                    Logger.Info(SystemTag.Input, $"Move Started: {value}");
+                    //Logger.Info(SystemTag.Input, $"Move Started: {value}");
                     MoveStarted?.Invoke(value);
                     break;
                 case InputActionPhase.Performed:
-                    Logger.Info(SystemTag.Input, $"Move: {value}");
-                    Move?.Invoke(value);
+                    //Logger.Info(SystemTag.Input, $"Move: {value}");
+                    MovePerformed?.Invoke(value);
                     break;
                 case InputActionPhase.Canceled:
-                    Logger.Info(SystemTag.Input, $"Move Ended: {value}");
-                    MoveEnded?.Invoke(value);
+                    //Logger.Info(SystemTag.Input, $"Move Ended: {value}");
+                    MoveCanceled?.Invoke(value);
                     break;
             }
         }
@@ -98,7 +96,7 @@ namespace Game.Input
             if (context.phase == InputActionPhase.Performed)
             {
                 var value = context.ReadValue<Vector2>();
-                Logger.Info(SystemTag.Input, $"Move Camera: {value}");
+                //Logger.Info(SystemTag.Input, $"Move Camera: {value}");
                 MoveCamera?.Invoke(value);
             }
         }

@@ -6,6 +6,8 @@ namespace Game.Gameplay
 {
     public sealed class GameScope : MonoSingleton, IContainerScope
     {
+        [SerializeField] private PlayerSettings playerSettings;
+        
         public ICedarContainer RootContainer { get; private set; }
         
         protected override void AwakeImpl()
@@ -31,6 +33,8 @@ namespace Game.Gameplay
             var builder = new CedarContainerBuilder(logger, parent);
 
             // Player management
+            builder.RegisterInstance(playerSettings);
+            builder.Register<PlayerSpawner>();
             builder.Register<PlayerController>();
             
             RootContainer = builder.Build();
