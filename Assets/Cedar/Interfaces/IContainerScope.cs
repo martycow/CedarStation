@@ -4,6 +4,8 @@ namespace Cedar.Core
 {
     public interface IContainerScope : IDisposable
     {
-        public ICedarContainer RootContainer { get; }
+        ICedarContainer Container { get; }
+        ICedarContainer CreateAndInitContainer(ICedarLogger logger, ICedarContainer parent);
+        ICedarContainerBuilder CreateBuilder(string containerName, ICedarLogger logger, ICedarContainer parent);
     }
 }

@@ -1,11 +1,12 @@
-﻿using System;
-using Cedar.Core;
+﻿using Cedar.Core;
 using Game.General;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Game.Gameplay
 {
-    public sealed class PlayerController : IInitializable, IDisposable
+    //TODO: Add cached playerview
+    public sealed class PlayerController
     {
         private readonly IGameplayInputEvents _gameplayInputEvents;
         private readonly PlayerSettings _playerSettings;
@@ -24,28 +25,14 @@ namespace Game.Gameplay
             _playerSpawner = playerSpawner;
             _logger = logger;
         }
-        
-        public void Initialize()
-        {
-            var data = new SpawnData
-            {
-                Position = Vector3.zero,
-                Rotation = Quaternion.identity
-            };
-            
-            InitPlayer(data);
-        }
-        
-        public void Dispose()
-        {
-            _gameplayInputEvents.MovePerformed -= OnMovePerformed;
-            _gameplayInputEvents.MoveCanceled -= MoveCanceled;
-        }
 
-        public void InitPlayer(SpawnData data)
+        public void CreatePlayer(SpawnData data)
         {
             if (_player != null)
+            {
+                _logger.Error(SystemTag.Gameplay, "Player already exists.");
                 return;
+            }
             
             _player = _playerSpawner.Spawn(data);
             _playerContext = new PlayerContext
@@ -55,20 +42,23 @@ namespace Game.Gameplay
             };
             
             _player.Setup(_playerContext, ViewUpdateType.OnSetup | ViewUpdateType.EveryFrame);
-            
-            _gameplayInputEvents.MovePerformed += OnMovePerformed;
-            _gameplayInputEvents.MoveCanceled += MoveCanceled;
+            _gameplayInputEvents.OnPlayerMoveChanged += SetPlayerMoveInput;
+            _eventBus.Publish(new PlayerCreatedEvent(_player));
         }
-        
-        private void OnMovePerformed(Vector2 inputValue)
-        {
-            if (_playerContext == null)
-                return;
 
-            _playerContext.MoveInput = inputValue;
+        public void DestroyPlayer()
+        {
+            if (_player == null)
+                return;
+            
+            Object.Destroy(_player.gameObject);
+            _player = null;
+            _playerContext = null;
+            _gameplayInputEvents.OnPlayerMoveChanged -= SetPlayerMoveInput;
+            _eventBus.Publish(new PlayerDestroyedEvent());
         }
         
-        private void MoveCanceled(Vector2 inputValue)
+        private void SetPlayerMoveInput(Vector2 inputValue)
         {
             if (_playerContext == null)
                 return;

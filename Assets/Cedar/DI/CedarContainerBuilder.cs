@@ -7,11 +7,13 @@ namespace Cedar.Core
         public IEnumerable<IDependency> Dependencies => _dependencies;
         
         private readonly List<IDependency> _dependencies = new();
+        private readonly string _containerName;
         private readonly ICedarLogger _logger;
         private readonly ICedarContainer _parent;
 
-        public CedarContainerBuilder(ICedarLogger cedarLogger, ICedarContainer parent = null)
+        public CedarContainerBuilder(string containerName, ICedarLogger cedarLogger, ICedarContainer parent)
         {
+            _containerName = containerName;
             _logger = cedarLogger;
             _parent = parent;
         }
@@ -40,7 +42,7 @@ namespace Cedar.Core
 
         public ICedarContainer Build()
         {
-            return new CedarContainer(_dependencies, _logger, _parent);
+            return new CedarContainer(_containerName, _dependencies, _logger, _parent);
         }
     }
 }

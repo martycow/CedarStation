@@ -34,8 +34,6 @@ namespace Game.Input
         {
             foreach (var (_, state) in States)
                 state.OnDeviceChanged += DeviceChangeHandler;
-            
-            SetState(InputStateType.Gameplay);
         }
 
         public void Dispose()

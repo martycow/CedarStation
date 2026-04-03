@@ -43,14 +43,14 @@ namespace Editor
             EditorGUILayout.LabelField("Cedar Container", EditorStyles.boldLabel);
             
             // Info Message
-            if (!Application.isPlaying || scope.RootContainer == null)
+            if (!Application.isPlaying || scope.Container == null)
             {
                 EditorGUILayout.HelpBox("Container is not initialized. Enter Play Mode to inspect dependencies.", MessageType.Info);
                 return;
             }
 
             // Status Bar
-            DrawStatusBar(scope.RootContainer.RegisteredDependencies);
+            DrawStatusBar(scope.Container.RegisteredDependencies);
             
             EditorGUILayout.Space(4);
             EditorGUILayout.BeginHorizontal();
@@ -62,7 +62,7 @@ namespace Editor
             EditorGUILayout.Space(4);
             
             // Dependency List
-            DrawDependencyList(_filter, scope.RootContainer.RegisteredDependencies, ref _scrollPos);
+            DrawDependencyList(_filter, scope.Container.RegisteredDependencies, ref _scrollPos);
             
             if (Application.isPlaying)
                 Repaint();

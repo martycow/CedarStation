@@ -11,11 +11,9 @@ namespace Game.Input
         InputActions.IViewActions,
         InputActions.IActionsActions
     {
-        public event Action<Vector2> MoveStarted;
-        public event Action<Vector2> MovePerformed;
-        public event Action<Vector2> MoveCanceled;
-        public event Action<Vector2> MoveCamera;
-        public event Action<float> ZoomCamera;
+        public event Action<Vector2> OnPlayerMoveChanged;
+        public event Action<Vector2> OnCameraMoveChanged;
+        public event Action<float> OnCameraZoomChanged;
         public event Action Jump;
         public event Action Tool;
         public event Action Interact;
@@ -64,16 +62,13 @@ namespace Game.Input
             switch (context.phase)
             {
                 case InputActionPhase.Started:
-                    //Logger.Info(SystemTag.Input, $"Move Started: {value}");
-                    MoveStarted?.Invoke(value);
-                    break;
                 case InputActionPhase.Performed:
-                    //Logger.Info(SystemTag.Input, $"Move: {value}");
-                    MovePerformed?.Invoke(value);
-                    break;
                 case InputActionPhase.Canceled:
-                    //Logger.Info(SystemTag.Input, $"Move Ended: {value}");
-                    MoveCanceled?.Invoke(value);
+                    OnPlayerMoveChanged?.Invoke(value);
+                    break;
+                case InputActionPhase.Disabled:
+                    break;
+                case InputActionPhase.Waiting:
                     break;
             }
         }
@@ -81,10 +76,13 @@ namespace Game.Input
         public void OnJump(InputAction.CallbackContext context)
         {
             TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+
+            switch (context.phase)
             {
-                Logger.Info(SystemTag.Input, "Jump");
-                Jump?.Invoke();
+                case InputActionPhase.Performed:
+                    Logger.Info(SystemTag.Input, "Jump");
+                    Jump?.Invoke();
+                    break;
             }
         }
         #endregion
@@ -92,23 +90,37 @@ namespace Game.Input
         #region Look
         public void OnMoveCamera(InputAction.CallbackContext context)
         {
+            var value = context.ReadValue<Vector2>();
             TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                var value = context.ReadValue<Vector2>();
-                //Logger.Info(SystemTag.Input, $"Move Camera: {value}");
-                MoveCamera?.Invoke(value);
+                case InputActionPhase.Started:
+                case InputActionPhase.Performed:
+                case InputActionPhase.Canceled:
+                    OnCameraMoveChanged?.Invoke(value);
+                    break;
+                case InputActionPhase.Disabled:
+                    break;
+                case InputActionPhase.Waiting:
+                    break;
             }
         }
 
         public void OnZoomCamera(InputAction.CallbackContext context)
         {
+            var value = context.ReadValue<float>();
             TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                var value = context.ReadValue<float>();
-                Logger.Info(SystemTag.Input, $"Zoom Camera: {value}");
-                ZoomCamera?.Invoke(value);
+                case InputActionPhase.Started:
+                case InputActionPhase.Performed:
+                case InputActionPhase.Canceled:
+                    OnCameraZoomChanged?.Invoke(value);
+                    break;
+                case InputActionPhase.Disabled:
+                    break;
+                case InputActionPhase.Waiting:
+                    break;
             }
         }
         #endregion
@@ -117,50 +129,60 @@ namespace Game.Input
         public void OnTool(InputAction.CallbackContext context)
         {
             TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                Logger.Info(SystemTag.Input, "Tool");
-                Tool?.Invoke();
+                case  InputActionPhase.Performed:  
+                    Logger.Info(SystemTag.Input, "Tool");
+                    Tool?.Invoke();
+                    break;
             }
         }
 
         public void OnInteract(InputAction.CallbackContext context)
         {
             TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                Logger.Info(SystemTag.Input, "Interact");
-                Interact?.Invoke();
+                case InputActionPhase.Performed:
+                    Logger.Info(SystemTag.Input, "Interact");
+                    Interact?.Invoke();
+                    break;
             }
         }
 
         public void OnKick(InputAction.CallbackContext context)
         {
             TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                Logger.Info(SystemTag.Input, "Kick");
-                Kick?.Invoke();
+                case InputActionPhase.Performed:
+                    Logger.Info(SystemTag.Input, "Kick");
+                    Kick?.Invoke();
+                    break;
             }
         }
 
         public void OnCrouch(InputAction.CallbackContext context)
         {
             TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                Logger.Info(SystemTag.Input, "Crouch");
-                Crouch?.Invoke();
+                case InputActionPhase.Performed:
+                    Logger.Info(SystemTag.Input, "Crouch");
+                    Crouch?.Invoke();
+                    break;
             }
         }
 
         public void OnOpenMenu(InputAction.CallbackContext context)
         {
             TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                Logger.Info(SystemTag.Input, "Open Menu");
-                OpenMenu?.Invoke();
+                case InputActionPhase.Performed:
+                    Logger.Info(SystemTag.Input, "Open Menu");
+                    OpenMenu?.Invoke();
+                    break;
             }
         }
         #endregion

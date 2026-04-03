@@ -112,6 +112,14 @@ namespace Game.General
 #endif
         }
 
+        public void Line(int fillWidth = 0, char fill = ' ')
+        {
+#if UNITY_EDITOR || DEBUG_BUILD
+            var line = new string(fill, fillWidth);
+            Debug.Log(line);
+#endif
+        }
+
         private static string BuildString(SystemTag systemTag, string message, Color primaryColor, Color secondaryColor)
         {
             var primaryHex = ColorUtility.ToHtmlStringRGB(primaryColor);
@@ -153,7 +161,5 @@ namespace Game.General
             
             return builder.ToString();
         }
-
-        
     }
 }

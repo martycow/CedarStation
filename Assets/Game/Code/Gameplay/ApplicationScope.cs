@@ -2,85 +2,100 @@
 using Game.General;
 using Game.Input;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Game.Gameplay
 {
+    /// <summary>
+    /// Top-level scope for the entire application. Runs core systems
+    /// </summary>
     public sealed class ApplicationScope : MonoSingleton, IContainerScope
     {
         [SerializeField] private LoggerSettings loggerSettings;
 
-        public ICedarContainer RootContainer { get; private set; }
+        public ICedarContainer Container { get; private set; }
 
         private InputActions _inputActions;
 
         protected override void AwakeImpl()
         {
-            Initialize(new CedarLogger(loggerSettings));
+            name = Const.Main.ApplicationScene;
             
-#if UNITY_EDITOR
-            LoadAdditiveGame();
-#endif
+            // Creating root logger
+            var logger = new CedarLogger(loggerSettings);
+            logger.Line(20, '=');
+            logger.Info(SystemTag.Application, $"Starting {Application.productName} v{Application.version}...");
+            logger.Line(20, '=');
+            
+            // Creating App-level container (no parent)
+            Container = CreateAndInitContainer(logger, parent: null);
+
+            // By default, no control
+            var inputManager = Container.Resolve<IInputManager>();
+            inputManager.SetState(InputStateType.NoControl);
+            
+            // For now - load Game scene and stuff
+            Utilities.Scenes.Load(Const.Main.GameplayScene);
+            
+            logger.Line(20, '=');
+            logger.Success(SystemTag.Application, $"{Application.productName} started.");
+            logger.Line(20, '=');
         }
 
         private void OnDestroy()
         {
             Dispose();
         }
-
-        private void Initialize(ICedarLogger logger)
+        
+        public void Dispose()
+        {
+            _inputActions?.Dispose();
+            Container?.Dispose();
+        }
+        
+        public ICedarContainer CreateAndInitContainer(ICedarLogger logger,  ICedarContainer parent)
         {
             _inputActions = new InputActions();
-            
-            logger.Info(SystemTag.Application, $"Starting {Application.productName} v{Application.version}...");
-            RootContainer = CreateBuilder(logger).Build();
+
+            var builder = CreateBuilder(Const.Main.ApplicationScene, logger, parent);
+            var container = builder.Build();
 
             // Injecting dependencies into MonoBehaviours
             var monoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
             foreach (var instance in monoBehaviours)
-                RootContainer.Inject(instance);
+                container.Inject(instance);
             
-            RootContainer.Initialize();
-            logger.Success(SystemTag.Application, $"{Application.productName} started.");
+            container.Initialize();
+            return container;
         }
 
-        public void Dispose()
+        public ICedarContainerBuilder CreateBuilder(string containerName, ICedarLogger logger, ICedarContainer parent = null)
         {
-            _inputActions?.Dispose();
-            RootContainer?.Dispose();
-        }
-
-        private CedarContainerBuilder CreateBuilder(ICedarLogger logger)
-        {
-            var builder = new CedarContainerBuilder(logger);
+            var builder = new CedarContainerBuilder(containerName, logger, parent);
 
             builder.RegisterInstance(logger);
-            builder.RegisterInstance(_inputActions);
             builder.Register<EventBus>();
 
-            // Gameplay controls
-            builder.Register<GameplayInputState>();
-            builder.Register<IGameplayInputEvents, GameplayInputState>();
+            // Input System
+            {
+                builder.RegisterInstance(_inputActions);
+                
+                // Gameplay controls
+                builder.Register<GameplayInputState>();
+                builder.Register<IGameplayInputEvents, GameplayInputState>();
 
-            // Menu controls
-            builder.Register<MenuInputState>();
-            builder.Register<IMenuInputEvents, MenuInputState>();
+                // Menu controls
+                builder.Register<MenuInputState>();
+                builder.Register<IMenuInputEvents, MenuInputState>();
 
-            // No control mode
-            builder.Register<NoControlState>();
+                // No control mode
+                builder.Register<NoControlState>();
 
-            builder.Register<IInputManager, InputManager>();
+                builder.Register<IInputManager, InputManager>();
+            }
             
             return builder;
         }
-
-#if UNITY_EDITOR
-        private void LoadAdditiveGame()
-        {
-            var gameScene = UnityEngine.SceneManagement.SceneManager.GetSceneByName(Const.Main.GameScene);
-            if (!gameScene.isLoaded)
-                UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(Const.Main.GameScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
-        }
-#endif
     }
 }
     
