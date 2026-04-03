@@ -112,7 +112,7 @@ namespace Game.General
 #endif
         }
 
-        public void Line(int fillWidth = 0, char fill = ' ')
+        public void Line(int fillWidth = 50, char fill = '=')
         {
 #if UNITY_EDITOR || DEBUG_BUILD
             var line = new string(fill, fillWidth);

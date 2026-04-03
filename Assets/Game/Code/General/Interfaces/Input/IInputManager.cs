@@ -12,5 +12,6 @@ namespace Game.General
         InputDeviceType CurrentDevice { get; }
 
         void SetState(InputStateType mode);
+        void SetDevice(InputDeviceType device);
     }
 }

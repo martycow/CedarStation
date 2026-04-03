@@ -41,53 +41,58 @@ namespace Game.Input
 
         public void OnNavigate(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                var value = context.ReadValue<Vector2>();
-                Logger.Info(SystemTag.Input, $"Navigate: {value}");
-                Navigate?.Invoke(value);
+                case InputActionPhase.Performed:
+                    var value = context.ReadValue<Vector2>();
+                    Logger.Info(SystemTag.Input, $"Navigate: {value}");
+                    Navigate?.Invoke(value);
+                    break;
             }
         }
 
         public void OnPoint(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                var value = context.ReadValue<Vector2>();
-                Logger.Info(SystemTag.Input, $"Point: {value}");
-                Navigate?.Invoke(value);
+                case InputActionPhase.Performed:
+                    var value = context.ReadValue<Vector2>();
+                    Logger.Info(SystemTag.Input, $"Point: {value}");
+                    Navigate?.Invoke(value);
+                    break;
             }
         }
 
         public void OnConfirm(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                Logger.Info(SystemTag.Input, $"Confirm");
-                Confirm?.Invoke();
+                case InputActionPhase.Performed:
+                    Logger.Info(SystemTag.Input, $"Confirm");
+                    Confirm?.Invoke();
+                    break;
             }
         }
 
         public void OnBack(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                Logger.Info(SystemTag.Input, $"Back");
-                Back?.Invoke();
+                case InputActionPhase.Performed:
+                    Logger.Info(SystemTag.Input, $"Back");
+                    Back?.Invoke();
+                    break;
             }
         }
 
         public void OnCloseMenu(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
-            if (context.phase == InputActionPhase.Performed)
+            switch (context.phase)
             {
-                Logger.Info(SystemTag.Input, $"Close Menu");
-                CloseMenu?.Invoke();
+                case InputActionPhase.Performed:
+                    Logger.Info(SystemTag.Input, $"CloseMenu");
+                    CloseMenu?.Invoke();
+                    break;
             }
         }
     }

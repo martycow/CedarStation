@@ -12,6 +12,8 @@ namespace Game.Gameplay
 
         protected override void AwakeImpl()
         {
+            name = $"Scope_{Const.Main.GameplayScene}";
+            
             // Looking for App-level container
             var appScope = FindAnyObjectByType<ApplicationScope>();
             if (appScope == null)

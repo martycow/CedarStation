@@ -57,26 +57,19 @@ namespace Game.Input
         #region Moving
         public void OnMove(InputAction.CallbackContext context)
         {
-            var value = context.ReadValue<Vector2>();
-            TrackDevice(context);
             switch (context.phase)
             {
                 case InputActionPhase.Started:
                 case InputActionPhase.Performed:
                 case InputActionPhase.Canceled:
+                    var value = context.ReadValue<Vector2>();
                     OnPlayerMoveChanged?.Invoke(value);
-                    break;
-                case InputActionPhase.Disabled:
-                    break;
-                case InputActionPhase.Waiting:
                     break;
             }
         }
 
         public void OnJump(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
-
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
@@ -90,13 +83,12 @@ namespace Game.Input
         #region Look
         public void OnMoveCamera(InputAction.CallbackContext context)
         {
-            var value = context.ReadValue<Vector2>();
-            TrackDevice(context);
             switch (context.phase)
             {
-                case InputActionPhase.Started:
                 case InputActionPhase.Performed:
+                case InputActionPhase.Started:
                 case InputActionPhase.Canceled:
+                    var value = context.ReadValue<Vector2>();
                     OnCameraMoveChanged?.Invoke(value);
                     break;
                 case InputActionPhase.Disabled:
@@ -108,13 +100,12 @@ namespace Game.Input
 
         public void OnZoomCamera(InputAction.CallbackContext context)
         {
-            var value = context.ReadValue<float>();
-            TrackDevice(context);
             switch (context.phase)
             {
                 case InputActionPhase.Started:
                 case InputActionPhase.Performed:
                 case InputActionPhase.Canceled:
+                    var value = context.ReadValue<float>();
                     OnCameraZoomChanged?.Invoke(value);
                     break;
                 case InputActionPhase.Disabled:
@@ -128,10 +119,9 @@ namespace Game.Input
         #region Actions
         public void OnTool(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
             switch (context.phase)
             {
-                case  InputActionPhase.Performed:  
+                case  InputActionPhase.Performed:
                     Logger.Info(SystemTag.Input, "Tool");
                     Tool?.Invoke();
                     break;
@@ -140,7 +130,6 @@ namespace Game.Input
 
         public void OnInteract(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
@@ -152,7 +141,6 @@ namespace Game.Input
 
         public void OnKick(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
@@ -164,7 +152,6 @@ namespace Game.Input
 
         public void OnCrouch(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
@@ -176,7 +163,6 @@ namespace Game.Input
 
         public void OnOpenMenu(InputAction.CallbackContext context)
         {
-            TrackDevice(context);
             switch (context.phase)
             {
                 case InputActionPhase.Performed:

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Game.Gameplay
 {
-    internal class GameStarter : IInitializable, IDisposable
+    internal class GameStarter : IDisposable
     {
         private readonly PlayerController _playerController;
         private readonly IInputManager _inputManager;
@@ -16,11 +16,6 @@ namespace Game.Gameplay
             _playerController = playerController;
             _inputManager = inputManager;
             _logger = logger;
-        }
-        
-        public void Initialize()
-        {
-            
         }
 
         public void Dispose()
@@ -39,9 +34,9 @@ namespace Game.Gameplay
             _inputManager.SetState(InputStateType.Gameplay);
             _playerController.CreatePlayer(spawnData);
             
-            _logger.Line(20, '-');
+            _logger.Line();
             _logger.Success(SystemTag.Gameplay, "Game started.");
-            _logger.Line(20, '-');
+            _logger.Line();
         }
     }
 }

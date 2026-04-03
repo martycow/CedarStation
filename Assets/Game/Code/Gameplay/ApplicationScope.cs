@@ -19,13 +19,13 @@ namespace Game.Gameplay
 
         protected override void AwakeImpl()
         {
-            name = Const.Main.ApplicationScene;
+            name = $"Scope_{Const.Main.ApplicationScene}";
             
             // Creating root logger
             var logger = new CedarLogger(loggerSettings);
-            logger.Line(20, '=');
+            logger.Line();
             logger.Info(SystemTag.Application, $"Starting {Application.productName} v{Application.version}...");
-            logger.Line(20, '=');
+            logger.Line();
             
             // Creating App-level container (no parent)
             Container = CreateAndInitContainer(logger, parent: null);
@@ -37,9 +37,9 @@ namespace Game.Gameplay
             // For now - load Game scene and stuff
             Utilities.Scenes.Load(Const.Main.GameplayScene);
             
-            logger.Line(20, '=');
+            logger.Line();
             logger.Success(SystemTag.Application, $"{Application.productName} started.");
-            logger.Line(20, '=');
+            logger.Line();
         }
 
         private void OnDestroy()

@@ -12,6 +12,6 @@
         void Error(SystemTag tag, string message);
         void Success(SystemTag tag, string message);
         void Fail(SystemTag tag, string message);
-        void Line(int fillWidth = 0, char fill = ' ');
+        void Line(int fillWidth = 50, char fill = '=');
     }
 }
