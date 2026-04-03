@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(grep -E \"\\\\.cs$\")",
-      "Bash(xargs grep:*)",
-      "Bash(tree -L 3 /d/Games_Projects/CedarStation/Assets/Cedar -I *.meta)"
-    ]
-  }
-}
