@@ -27,7 +27,7 @@ namespace Game.Gameplay
         {
             var spawnData = new SpawnData
             {
-                Position = Vector3.zero,
+                Position = new Vector3(0f, 0f, 0f),
                 Rotation = Quaternion.identity
             };
             

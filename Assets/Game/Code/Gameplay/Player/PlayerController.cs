@@ -38,11 +38,18 @@ namespace Game.Gameplay
             _playerContext = new PlayerContext
             {
                 MoveInput = Vector2.zero,
-                MoveSpeed = _playerSettings.MoveSpeed
+                MoveSpeed = _playerSettings.MoveSpeed,
+                JumpCooldown = _playerSettings.JumpCooldown,
+                JumpForce = _playerSettings.JumpForce,
+                JumpInput = false
             };
             
-            _player.Setup(_playerContext, ViewUpdateType.OnSetup | ViewUpdateType.EveryFrame);
+            _player.Setup(_playerContext, ViewUpdateType.OnSetup | 
+                                                    ViewUpdateType.EveryFrame | 
+                                                    ViewUpdateType.EveryFixedUpdate);
             _gameplayInputEvents.OnPlayerMoveChanged += SetPlayerMoveInput;
+            _gameplayInputEvents.Jump += OnJumpInput;
+
             _eventBus.Publish(new PlayerCreatedEvent(_player));
         }
 
@@ -55,6 +62,7 @@ namespace Game.Gameplay
             _player = null;
             _playerContext = null;
             _gameplayInputEvents.OnPlayerMoveChanged -= SetPlayerMoveInput;
+            _gameplayInputEvents.Jump -= OnJumpInput;
             _eventBus.Publish(new PlayerDestroyedEvent());
         }
         
@@ -64,6 +72,14 @@ namespace Game.Gameplay
                 return;
 
             _playerContext.MoveInput = inputValue;
+        }
+        
+        private void OnJumpInput()
+        {
+            if (_playerContext == null)
+                return;
+            
+            _playerContext.JumpInput = true;
         }
     }
 }

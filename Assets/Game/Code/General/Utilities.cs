@@ -61,5 +61,18 @@ namespace Game.General
                 return ColorUtility.TryParseHtmlString(hex, out var color) ? color : fallbackColor;
             }
         }
+
+        public static class DebugTools
+        {
+            public static void DrawArrow(Vector3 from, Vector3 to, Color color)
+            {
+                Debug.DrawLine(from, to, color);
+                var direction = (to - from).normalized;
+                var right = Quaternion.LookRotation(direction) * Quaternion.Euler(0, 150, 0) * Vector3.forward;
+                var left = Quaternion.LookRotation(direction) * Quaternion.Euler(0, -150, 0) * Vector3.forward;
+                Debug.DrawLine(to, to + right * 0.25f, color);
+                Debug.DrawLine(to, to + left * 0.25f, color);
+            }
+        }
     }
 }

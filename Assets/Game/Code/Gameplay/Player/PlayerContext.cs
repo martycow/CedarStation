@@ -6,5 +6,8 @@ namespace Game.Gameplay
     {
         public Vector2 MoveInput;
         public float MoveSpeed;
+        public bool JumpInput;
+        public float JumpForce;
+        public float JumpCooldown;
     }
 }
