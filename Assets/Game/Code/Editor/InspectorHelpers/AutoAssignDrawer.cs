@@ -3,6 +3,7 @@ using System.Reflection;
 using Game.General;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Editor
 {
@@ -46,7 +47,7 @@ namespace Editor
  
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
             => EditorGUI.GetPropertyHeight(property, label, true);
- 
+
         private static void TryAssign(SerializedProperty property, AutoAssignAttribute attr)
         {
             var targetObject = property.serializedObject.targetObject as Component;
@@ -55,43 +56,66 @@ namespace Editor
                 Debug.LogWarning("[AutoAssign] Target is not a Component.");
                 return;
             }
- 
+
             var fieldType = GetFieldType(property);
             if (fieldType == null)
             {
                 Debug.LogWarning($"[AutoAssign] Could not determine field type for '{property.name}'.");
                 return;
             }
- 
-            var found = Search(targetObject, fieldType, attr.Scope);
-            if (found == null)
-            {
-                Debug.LogWarning(
-                    $"[AutoAssign] No component of type <b>{fieldType.Name}</b> found " +
-                    $"on '{targetObject.gameObject.name}' (scope: {attr.Scope}).",
-                    targetObject.gameObject);
+
+            var foundObj = string.IsNullOrEmpty(attr.NamePart) ? 
+                Search(targetObject, fieldType) : 
+                Search(targetObject, fieldType, attr.NamePart);
+
+            if (foundObj == null)
                 return;
-            }
- 
-            Undo.RecordObject(property.serializedObject.targetObject, $"AutoAssign {fieldType.Name}");
-            property.objectReferenceValue = found;
+            
+            Undo.RecordObject(property.serializedObject.targetObject, $"Auto Assign {fieldType.Name}");
+            property.objectReferenceValue = foundObj;
             property.serializedObject.ApplyModifiedProperties();
         }
- 
-        private static UnityEngine.Object Search(Component root, Type type, SearchScope scope)
+
+        private static Object Search(Component root, Type type)
         {
-            return scope switch
+            Object result = root.GetComponent(type);
+            if (result != null) 
+                return result;
+            
+            result = root.GetComponentInChildren(type, includeInactive: true);
+            if (result == null)
+                result = root.GetComponentInParent(type, includeInactive: true);
+
+            return result;
+        }
+
+        private static Object Search(Component root, Type type, string containName)
+        {
+            var selfComps = root.GetComponents(type);
+            if (selfComps != null)
             {
-                SearchScope.Self => root.GetComponent(type),
-                SearchScope.SelfThenChildren => root.GetComponent(type) ??
-                                                root.GetComponentInChildren(type, includeInactive: true),
-                SearchScope.SelfThenParents => root.GetComponent(type) ??
-                                               root.GetComponentInParent(type, includeInactive: true),
-                SearchScope.SelfThenChildrenThenParents => root.GetComponent(type) ??
-                                                           root.GetComponentInChildren(type, includeInactive: true) ??
-                                                           root.GetComponentInParent(type, includeInactive: true),
-                _ => null
-            };
+                foreach (var comp in selfComps)
+                    if (comp.name.Contains(containName))
+                        return comp.gameObject;
+            }
+            
+            var childrenComps = root.GetComponentsInChildren(type, includeInactive: true);
+            if (childrenComps != null)
+            {
+                foreach (var childrenComp in childrenComps)
+                    if (childrenComp.name.Contains(containName))
+                        return childrenComp.gameObject;
+            }
+            
+            var parentComps = root.GetComponentsInParent(type, includeInactive: true);
+            if (parentComps != null)
+            {
+                foreach (var parentComp in parentComps)
+                    if (parentComp.name.Contains(containName)) 
+                        return parentComp.gameObject;
+            }
+
+            return null;
         }
         
         private static Type GetFieldType(SerializedProperty property)

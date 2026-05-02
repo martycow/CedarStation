@@ -4,13 +4,14 @@ using UnityEngine;
 namespace Game.Gameplay
 {
     [RequireComponent(typeof(CharacterController))]
-    public sealed class PlayerView : BaseView<PlayerContext>
+    public sealed class PlayerView : BaseView<PlayerInputContext>
     {
         [SerializeField, AutoAssign] private CharacterController characterController;
         [SerializeField, AutoAssign] private Animator animator;
-        [SerializeField] private CharacterRenderers character;
+        [SerializeField] private CharacterVisual visual;
 
         public bool IsGrounded { get; private set; }
+        public CharacterVisual Visual => visual;
         
         private int _hoodieOffIndex;
 
@@ -20,7 +21,7 @@ namespace Game.Gameplay
         {
             base.Init();
             
-            _hoodieOffIndex = character.OutfitJacket.sharedMesh.GetBlendShapeIndex("Hoodie_Off");
+            _hoodieOffIndex = visual.OutfitJacket.sharedMesh.GetBlendShapeIndex("Hoodie_Off");
         }
 
         public override void UpdateView()
@@ -58,12 +59,12 @@ namespace Game.Gameplay
 
         public void TurnOnHoodie()
         {
-            character.OutfitJacket.SetBlendShapeWeight(_hoodieOffIndex, 0f);
+            visual.OutfitJacket.SetBlendShapeWeight(_hoodieOffIndex, 0f);
         }
 
         public void TurnOffHoodie()
         {
-            character.OutfitJacket.SetBlendShapeWeight(_hoodieOffIndex, 100f);
+            visual.OutfitJacket.SetBlendShapeWeight(_hoodieOffIndex, 100f);
         }
     }
 }

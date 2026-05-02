@@ -6,23 +6,15 @@ namespace Game.General
     [AttributeUsage(AttributeTargets.Field)]
     public class AutoAssignAttribute : PropertyAttribute
     {
-        public readonly SearchScope Scope;
+        public readonly string NamePart;
         public readonly bool AutoFillOnEnable;
 
         public AutoAssignAttribute(
-            SearchScope searchScope = SearchScope.SelfThenChildrenThenParents,
+            string namePart = "",
             bool autoFillOnEnable = false)
         {
-            Scope = searchScope;
+            NamePart = namePart;
             AutoFillOnEnable = autoFillOnEnable;
         }
-    }
-
-    public enum SearchScope
-    {
-        Self,
-        SelfThenChildren,
-        SelfThenParents,
-        SelfThenChildrenThenParents
     }
 }

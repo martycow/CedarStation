@@ -61,7 +61,7 @@ namespace Game.Gameplay
             var container = builder.Build();
 
             // Injecting dependencies into MonoBehaviours
-            var monoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+            var monoBehaviours = FindObjectsByType<MonoBehaviour>();
             foreach (var instance in monoBehaviours)
                 container.Inject(instance);
             

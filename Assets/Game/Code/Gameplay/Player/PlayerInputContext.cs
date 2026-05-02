@@ -1,0 +1,13 @@
+﻿using UnityEngine;
+
+namespace Game.Gameplay
+{
+    public class PlayerInputContext
+    {
+        public Vector2 MoveInput;
+        public float MoveSpeed;
+        public bool JumpInput;
+        public float JumpForce;
+        public float JumpCooldown;
+    }
+}

@@ -11,6 +11,18 @@ namespace Game.General
             public const string MenuScene = "Menu";
         }
 
+        public static class Character
+        {
+            public static class BlendShapes
+            {
+                public const string HoodieOff =  "Hoodie_Off";
+                
+                public const string Mad = "Exp_Mad";
+                public const string Sad = "Exp_Sad";
+                public const string Happy = "Exp_Smile";
+            }
+        }
+        
         public static class CharacterAnimator
         {
             public static readonly int Move = Animator.StringToHash("Move");
