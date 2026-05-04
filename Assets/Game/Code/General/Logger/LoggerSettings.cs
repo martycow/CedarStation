@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Game.General
 {
-    [CreateAssetMenu(menuName = "Tools/Create Logger Settings")]
+    [CreateAssetMenu(menuName = "Cedar Station/Tools/Create Logger Settings", fileName = "Settings_Logger")]
     public class LoggerSettings : ScriptableObject
     {
         [SerializeField] private Color[] primaryColors =

@@ -19,8 +19,10 @@ ModelImporter:
     animationImportErrors: 
     animationImportWarnings: "\nClip 'russell|Anim_Walking_IN_PLACE_remap' has import
       animation warnings that might lower retargeting quality:\nNote: Activate translation
-      DOF on avatar to improve retargeting quality.\n\t'spine_02.x' is inbetween
-      humanoid transforms and has rotation animation that will be discarded.\n"
+      DOF on avatar to improve retargeting quality.\n\t'root.x' has translation animation
+      that will be discarded.\n\t'root.x' is inbetween humanoid transforms and has
+      rotation animation that will be discarded.\n\t'spine_02.x' is inbetween humanoid
+      transforms and has rotation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0

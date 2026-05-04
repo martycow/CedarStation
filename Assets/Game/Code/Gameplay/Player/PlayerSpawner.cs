@@ -8,7 +8,7 @@ namespace Game.Gameplay
         private readonly PlayerSettings _playerSettings;
         private readonly ICedarLogger _logger;
 
-        private PlayerView _player;
+        private Player _player;
         private PlayerEmotionView _playerEmotionView;
         
         public PlayerSpawner(PlayerSettings playerSettings, ICedarLogger logger)
@@ -17,7 +17,7 @@ namespace Game.Gameplay
             _logger = logger;
         }
         
-        public (PlayerView, PlayerEmotionView) Spawn(SpawnData spawnData)
+        public (Player, PlayerEmotionView) Spawn(Vector3 spawnPos, Quaternion spawnRot)
         {
             if (_player != null && _playerEmotionView != null)
             {
@@ -25,7 +25,7 @@ namespace Game.Gameplay
                 return (null, null);
             }
             
-            var instance = Object.Instantiate(_playerSettings.PlayerPrefab, spawnData.Position, spawnData.Rotation);
+            var instance = Object.Instantiate(_playerSettings.PlayerPrefab, spawnPos, spawnRot);
             var playerEmotionView = instance.GetComponent<PlayerEmotionView>();
 
             return (instance, playerEmotionView);

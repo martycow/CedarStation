@@ -6,8 +6,15 @@ namespace Game.Gameplay
 {
     public sealed class GameplayScope : MonoSingleton, IContainerScope
     {
-        [SerializeField] private PlayerSettings playerSettings;
+        [SerializeField]
+        private PlayerSettings playerSettings;
         
+        [SerializeField]
+        private LevelDataStorage levelDataStorage;
+        
+        [SerializeField]
+        private SaveSystemSettings saveSystemSettings;
+
         public ICedarContainer Container { get; private set; }
 
         protected override void AwakeImpl()
@@ -25,10 +32,6 @@ namespace Game.Gameplay
             // Creating container for Gameplay purposes
             var logger = appScope.Container.Resolve<ICedarLogger>();
             Container = CreateAndInitContainer(logger, appScope.Container);
-            
-            // For now - start game
-            var starter = Container.Resolve<GameStarter>();
-            starter.Start();
         }
 
         private void OnDestroy()
@@ -64,8 +67,18 @@ namespace Game.Gameplay
             builder.Register<PlayerSpawner>();
             builder.Register<PlayerController>();
 
+            // Save management
+            builder.RegisterInstance(saveSystemSettings);
+            builder.Register<SaveManager>();
+            
+            // Level management
+            builder.RegisterInstance(levelDataStorage);
+            levelDataStorage.Init();
+            
+            builder.Register<LevelManager>();
+
             // Starter
-            builder.Register<GameStarter>();
+            builder.Register<GameManager>();
 
             return builder;
         }

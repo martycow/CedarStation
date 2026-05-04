@@ -4,9 +4,9 @@ namespace Game.Gameplay
 {
     public class PlayerCreatedEvent : IGameEvent
     {
-        public readonly PlayerView Player;
+        public readonly Player Player;
 
-        public PlayerCreatedEvent(PlayerView player)
+        public PlayerCreatedEvent(Player player)
         {
             Player = player;
         }

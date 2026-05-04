@@ -13,7 +13,7 @@ namespace Game.Gameplay
         private readonly PlayerSpawner _playerSpawner;
         private readonly ICedarLogger _logger;
         
-        private PlayerView _player;
+        private Player _player;
         private PlayerInputContext _playerInputContext;
         private CharacterEmotionContext _characterEmotionContext;
         private PlayerEmotionView _playerEmotionView;
@@ -29,7 +29,7 @@ namespace Game.Gameplay
             _logger = logger;
         }
 
-        public void CreatePlayer(SpawnData data)
+        public void SpawnPlayer(Vector3 spawnPosition, Quaternion spawnRotation)
         {
             if (_player != null)
             {
@@ -37,7 +37,7 @@ namespace Game.Gameplay
                 return;
             }
 
-            (_player, _playerEmotionView) = _playerSpawner.Spawn(data);
+            (_player, _playerEmotionView) = _playerSpawner.Spawn(spawnPosition, spawnRotation);
             _playerVisual = _player.Visual;
             
             // Input
