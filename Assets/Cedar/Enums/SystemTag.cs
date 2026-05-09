@@ -10,6 +10,7 @@
         Emotion = 5,
         Data = 6,
         Level = 7,
-        Save = 8
+        Save = 8,
+        Player = 9,
     }
 }

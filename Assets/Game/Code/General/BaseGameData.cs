@@ -18,7 +18,7 @@ namespace Game.General
         public string TechName;
 
         [JsonProperty("data_type")]
-        public DataType DataType => ConcreteDataType;
+        public GameDataType DataType => ConcreteDataType;
         
         [JsonProperty("sub_type")] 
         public TSubData SubType;
@@ -36,7 +36,7 @@ namespace Game.General
             Logger = logger;
         }
         
-        protected abstract DataType ConcreteDataType { get; }
+        protected abstract GameDataType ConcreteDataType { get; }
 
         public string Serialize()
         {

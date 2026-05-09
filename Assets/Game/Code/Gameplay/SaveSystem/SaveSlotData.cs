@@ -20,7 +20,7 @@ namespace Game.Gameplay
         [JsonProperty("is_fresh")]
         public bool IsFresh;
         
-        protected override DataType ConcreteDataType => DataType.SaveSlot;
+        protected override GameDataType ConcreteDataType => GameDataType.SaveSlot;
         
         [JsonConstructor]
         private SaveSlotData() { }

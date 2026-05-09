@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Game.Gameplay
 {
-    public sealed class Level : BaseView<LevelData>
+    public sealed class Level : ContextView<LevelData>
     {
         private readonly Dictionary<Guid, VolumeBox> _spawnedVolumeBoxes = new();
         
@@ -17,7 +17,7 @@ namespace Game.Gameplay
             SpawnVolumeBoxes();
         }
 
-        public override void UpdateView()
+        protected override void UpdateView()
         {
             
         }
@@ -34,7 +34,7 @@ namespace Game.Gameplay
                 var go = new GameObject();
                 go.transform.SetParent(transform);
                 var volumeBox = go.AddComponent<VolumeBox>();
-                volumeBox.Setup(zone, ViewUpdateType.OnSetup | ViewUpdateType.EveryFrame);
+                volumeBox.Setup(zone, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
                 
                 _spawnedVolumeBoxes[zone.ID] = volumeBox;
             }
@@ -47,7 +47,7 @@ namespace Game.Gameplay
                 var go = new GameObject();
                 go.transform.SetParent(transform);
                 var volumeBox = go.AddComponent<VolumeBox>();
-                volumeBox.Setup(zone, ViewUpdateType.OnSetup | ViewUpdateType.EveryFrame);
+                volumeBox.Setup(zone, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
                 
                 _spawnedVolumeBoxes[zone.ID] = volumeBox;
             }
@@ -60,7 +60,7 @@ namespace Game.Gameplay
                 var go = new GameObject();
                 go.transform.SetParent(transform);
                 var volumeBox = go.AddComponent<VolumeBox>();
-                volumeBox.Setup(zone, ViewUpdateType.OnSetup | ViewUpdateType.EveryFrame);
+                volumeBox.Setup(zone, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
                 
                 _spawnedVolumeBoxes[zone.ID] = volumeBox;
             }

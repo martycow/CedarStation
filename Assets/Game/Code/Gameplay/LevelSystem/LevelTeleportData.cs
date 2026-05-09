@@ -15,7 +15,7 @@ namespace Game.Gameplay
         [JsonProperty("teleport_zone")]
         public VolumeData TeleportZone;
         
-        protected override DataType ConcreteDataType => DataType.LevelTeleport;
+        protected override GameDataType ConcreteDataType => GameDataType.LevelTeleport;
         
         // Generate new
         public LevelTeleportData(

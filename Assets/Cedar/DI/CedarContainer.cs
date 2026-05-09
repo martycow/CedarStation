@@ -57,11 +57,11 @@ namespace Cedar.Core
                     _logger.Info(SystemTag.Container, $"[{_containerName}] Initializing {t.GetType().Name}...");
                     t.Initialize();
                     _logger.Success(SystemTag.Container, $"[{_containerName}] {t.GetType().Name} initialized.");
-
                 }
                 catch (Exception e)
                 {
                     _logger.Fail(SystemTag.Container, $"[{_containerName}] Error initializing {t.GetType().Name}: {e.Message}.");
+                    return;
                 }
             }
             
@@ -83,6 +83,7 @@ namespace Cedar.Core
                 catch (Exception e)
                 {
                     _logger.Fail(SystemTag.Container, $"[{_containerName}] Error disposing {_disposables[i].GetType().Name}: {e.Message}.");
+                    return;
                 }
             }
             

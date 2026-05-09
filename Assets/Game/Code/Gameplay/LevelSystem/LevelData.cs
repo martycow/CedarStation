@@ -25,7 +25,7 @@ namespace Game.Gameplay
         [JsonProperty("other_spawn_zones")]
         public VolumeData[] OtherSpawnZones;
         
-        protected override DataType ConcreteDataType => DataType.Level;
+        protected override GameDataType ConcreteDataType => GameDataType.Level;
         
         // Generate
         public LevelData(

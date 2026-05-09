@@ -62,7 +62,7 @@ namespace Game.Gameplay
             {
                 _logger.Info(SystemTag.Level, $"Creating new level instance for Level ID: {levelID}.");
                 
-                var prefab = Resources.Load<Level>($"Prefabs/Levels/{levelData.PrefabName}");
+                var prefab = Resources.Load<Level>($"Levels/{levelData.PrefabName}");
                 if (prefab == null)
                 {
                     _logger.Error(SystemTag.Level, $"Level prefab with name {levelData.PrefabName} not found in Resources/Prefabs/Levels.");
@@ -77,7 +77,7 @@ namespace Game.Gameplay
                     levelData.SubType, 
                     _logger);
                 
-                levelInstance.Setup(data, ViewUpdateType.OnSetup | ViewUpdateType.EveryFrame);
+                levelInstance.Setup(data, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
                 
                 _currentLevel = levelInstance;
                 _currentLevelData = levelData;

@@ -8,8 +8,10 @@ namespace Game.Gameplay
         private readonly PlayerSettings _playerSettings;
         private readonly ICedarLogger _logger;
 
-        private Player _player;
-        private PlayerEmotionView _playerEmotionView;
+        private bool _spawned = false;
+        private CharacterMover _characterMover;
+        private CharacterVisual _playerVisual;
+        private CharacterEmotions _characterEmotions;
         
         public PlayerSpawner(PlayerSettings playerSettings, ICedarLogger logger)
         {
@@ -17,32 +19,38 @@ namespace Game.Gameplay
             _logger = logger;
         }
         
-        public (Player, PlayerEmotionView) Spawn(Vector3 spawnPos, Quaternion spawnRot)
+        public PlayerComponents Spawn(Vector3 spawnPos, Quaternion spawnRot)
         {
-            if (_player != null && _playerEmotionView != null)
+            if (_spawned || _playerVisual != null || _characterMover != null || _characterEmotions != null)
             {
-                _logger.Error(SystemTag.Gameplay, "Player already exists. Cannot spawn another player.");
-                return (null, null);
+                _logger.Error(SystemTag.Player, "Player already spawned.");
+                return PlayerComponents.Empty;
             }
             
-            var instance = Object.Instantiate(_playerSettings.PlayerPrefab, spawnPos, spawnRot);
-            var playerEmotionView = instance.GetComponent<PlayerEmotionView>();
-
-            return (instance, playerEmotionView);
+            _characterMover = Object.Instantiate(_playerSettings.CharacterMoverPrefab, spawnPos, spawnRot);
+            _playerVisual = _characterMover.GetComponent<CharacterVisual>();
+            _characterEmotions = _characterMover.GetComponent<CharacterEmotions>();
+            _spawned = true;
+            
+            _logger.Info(SystemTag.Player, "Created player instance.");
+            
+            return new PlayerComponents(_playerSettings, _playerVisual, _characterMover, _characterEmotions);
         }
 
         public void Kill()
         {
-            if (_player == null)
+            if (_characterMover == null)
             {
-                _logger.Error(SystemTag.Gameplay, "No player to kill.");
+                _logger.Error(SystemTag.Player, "No player to kill.");
                 return;
             }
             
-            Object.Destroy(_player.gameObject);
+            Object.Destroy(_characterMover.gameObject);
             
-            _player = null;
-            _playerEmotionView = null;
+            _playerVisual = null;
+            _characterMover = null;
+            _characterEmotions = null;
+            _spawned = false;
         }
     }
 }

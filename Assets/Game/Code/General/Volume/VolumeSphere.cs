@@ -3,7 +3,7 @@
 namespace Game.General
 {
     [AddComponentMenu("Cedar/Volume/Volume Sphere")]
-    public sealed class VolumeSphere : BaseView<VolumeData>
+    public sealed class VolumeSphere : ContextView<VolumeData>
     {
         [SerializeField]
         private SphereCollider sphereCollider;
@@ -22,7 +22,7 @@ namespace Game.General
             }
         }
 
-        public override void UpdateView()
+        protected override void UpdateView()
         {
             if (sphereCollider == null)
                 return;

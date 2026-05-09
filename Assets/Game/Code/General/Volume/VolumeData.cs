@@ -18,7 +18,7 @@ namespace Game.General
         [JsonProperty("is_trigger")]
         public bool IsTrigger;
         
-        protected override DataType ConcreteDataType => DataType.Volume;
+        protected override GameDataType ConcreteDataType => GameDataType.Volume;
         
         public VolumeData(
             Guid id, 

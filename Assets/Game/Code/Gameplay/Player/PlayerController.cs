@@ -13,10 +13,10 @@ namespace Game.Gameplay
         private readonly PlayerSpawner _playerSpawner;
         private readonly ICedarLogger _logger;
         
-        private Player _player;
-        private PlayerInputContext _playerInputContext;
+        private CharacterMover _characterMover;
+        private PlayerMovementContext _playerMovementContext;
         private CharacterEmotionContext _characterEmotionContext;
-        private PlayerEmotionView _playerEmotionView;
+        private CharacterEmotions _characterEmotions;
         
         private CharacterVisual _playerVisual;
 
@@ -31,68 +31,65 @@ namespace Game.Gameplay
 
         public void SpawnPlayer(Vector3 spawnPosition, Quaternion spawnRotation)
         {
-            if (_player != null)
+            _logger.Info(SystemTag.Player, "Spawning player");
+            
+            if (_characterMover != null)
             {
                 _logger.Error(SystemTag.Gameplay, "Player already exists.");
                 return;
             }
 
-            (_player, _playerEmotionView) = _playerSpawner.Spawn(spawnPosition, spawnRotation);
-            _playerVisual = _player.Visual;
+            // Spawning
+            var components = _playerSpawner.Spawn(spawnPosition, spawnRotation);
+            _characterMover = components.Movement;
+            _playerVisual = components.Visual;
+            _characterEmotions = components.Emotion;
             
-            // Input
-            _playerInputContext = new PlayerInputContext
-            {
-                MoveInput = Vector2.zero,
-                MoveSpeed = _playerSettings.MoveSpeed,
-                JumpCooldown = _playerSettings.JumpCooldown,
-                JumpForce = _playerSettings.JumpForce,
-                JumpInput = false
-            };
-            _gameplayInputEvents.OnPlayerMoveChanged += SetPlayerMoveInput;
-            _gameplayInputEvents.Jump += OnJumpInput;
+            // Creating movement context 
+            _playerMovementContext = new PlayerMovementContext(
+                2.4f,
+                _playerSettings.JumpCooldown,
+                _playerSettings.JumpForce);
             
-            _player.Setup(_playerInputContext, ViewUpdateType.OnSetup | 
-                                               ViewUpdateType.EveryFrame | 
-                                               ViewUpdateType.EveryFixedUpdate);
+            _gameplayInputEvents.OnPlayerMoveChanged += OnPlayerMoveChanged;
+            _gameplayInputEvents.Jump += _playerMovementContext.RequestJump;
+            
+            _characterMover.Setup(_playerMovementContext, ContextViewUpdateType.OnSetup | 
+                                                          ContextViewUpdateType.EveryFrame | 
+                                                          ContextViewUpdateType.EveryFixedUpdate);
             
             // Emotions
             _characterEmotionContext = new CharacterEmotionContext(_playerVisual, _logger);
             
-            _playerEmotionView.Setup(_characterEmotionContext, ViewUpdateType.OnSetup |
-                                                               ViewUpdateType.EveryFrame);
+            _characterEmotions.Setup(_characterEmotionContext, ContextViewUpdateType.OnSetup |
+                                                               ContextViewUpdateType.EveryFrame);
 
-            _eventBus.Publish(new PlayerCreatedEvent(_player));
+            _eventBus.Publish(new PlayerCreatedEvent(_characterMover));
+            
+            _logger.Success(SystemTag.Player, "Player spawned successfully.");
         }
 
         public void DestroyPlayer()
         {
-            if (_player == null)
+            if (_characterMover == null)
                 return;
             
-            Object.Destroy(_player.gameObject);
-            _player = null;
-            _playerInputContext = null;
+            _gameplayInputEvents.OnPlayerMoveChanged -= OnPlayerMoveChanged;
+            _gameplayInputEvents.Jump -= _playerMovementContext.RequestJump;
+            
+            Object.Destroy(_characterMover.gameObject);
+            
+            _characterMover = null;
+            _playerMovementContext = null;
             _characterEmotionContext = null;
-            _gameplayInputEvents.OnPlayerMoveChanged -= SetPlayerMoveInput;
-            _gameplayInputEvents.Jump -= OnJumpInput;
             _eventBus.Publish(new PlayerDestroyedEvent());
         }
         
-        private void SetPlayerMoveInput(Vector2 inputValue)
+        private void OnPlayerMoveChanged(Vector2 moveInput)
         {
-            if (_playerInputContext == null)
-                return;
-
-            _playerInputContext.MoveInput = inputValue;
-        }
-        
-        private void OnJumpInput()
-        {
-            if (_playerInputContext == null)
-                return;
+            var speed = _playerSettings.MoveSpeed * moveInput;
             
-            _playerInputContext.JumpInput = true;
+            _playerMovementContext.Speed.SetValue(speed);
         }
     }
 }
