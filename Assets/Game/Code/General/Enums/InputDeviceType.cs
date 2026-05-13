@@ -1,9 +1,8 @@
-﻿namespace Cedar.Core
+﻿namespace Game.General
 {
     public enum InputDeviceType
     {
         KeyboardMouse = 0,
         Gamepad = 1,
-        Touch = 2,
     }
 }

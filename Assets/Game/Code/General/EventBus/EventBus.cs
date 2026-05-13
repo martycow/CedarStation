@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Cedar.Core;
 
 namespace Game.General
 {
@@ -8,9 +7,9 @@ namespace Game.General
     {
         private readonly Dictionary<Type, Action<IGameEvent>> _handlers = new();
         private readonly Dictionary<Delegate, Action<IGameEvent>> _wrappers = new();
-        private readonly ICedarLogger _logger;
+        private readonly CedarLogger _logger;
 
-        public EventBus(ICedarLogger logger)
+        public EventBus(CedarLogger logger)
         {
             _logger = logger;
         }
@@ -22,7 +21,7 @@ namespace Game.General
         public void Dispose()
         {
             if (_handlers.Count > 0)
-                _logger.Warn(SystemTag.EventBus, $"Disposing with {_handlers.Count} event handlers still registered.");
+                _logger.Warn(LogTag.EventBus, $"Disposing with {_handlers.Count} event handlers still registered.");
             
             _handlers.Clear();
             _wrappers.Clear();
@@ -33,12 +32,12 @@ namespace Game.General
             var key = typeof(TEvent);
             if (!_handlers.TryGetValue(key, out var handler))
             {
-                _logger.Warn(SystemTag.EventBus, $"Event {key.Name} doesn't have subscribers. Event ignored.");
+                _logger.Warn(LogTag.EventBus, $"Event {key.Name} doesn't have subscribers. Event ignored.");
                 return;
             }
             
             var handlerCopy = handler;
-            _logger.Info(SystemTag.EventBus, $"Publishing event {key.Name}");
+            _logger.Info(LogTag.EventBus, $"Publishing event {key.Name}");
             handlerCopy.Invoke(gameEvent);
         }
         
@@ -46,7 +45,7 @@ namespace Game.General
         {
             if (_wrappers.ContainsKey(handler))
             {
-                _logger.Warn(SystemTag.EventBus, $"Handler already subscribed to {typeof(TEvent).Name}. Subscription ignored.");
+                _logger.Warn(LogTag.EventBus, $"Handler already subscribed to {typeof(TEvent).Name}. Subscription ignored.");
                 return;
             }
             
@@ -57,14 +56,14 @@ namespace Game.General
             
             _wrappers[handler] = MethodInstance;
             _handlers[key] = existingHandler + MethodInstance;
-            _logger.Info(SystemTag.EventBus, $"Subscriber added for event {key.Name}");
+            _logger.Info(LogTag.EventBus, $"Subscriber added for event {key.Name}");
         }
 
         public void Unsubscribe<TEvent>(Action<TEvent> handler) where TEvent : IGameEvent
         {
             if (!_wrappers.TryGetValue(handler, out var wrapper))
             {
-                _logger.Warn(SystemTag.EventBus, $"Handler not found for {typeof(TEvent).Name}. Unsubscription ignored.");
+                _logger.Warn(LogTag.EventBus, $"Handler not found for {typeof(TEvent).Name}. Unsubscription ignored.");
                 return;
             }
             
@@ -79,7 +78,7 @@ namespace Game.General
             }
             
             _wrappers.Remove(handler);
-            _logger.Info(SystemTag.EventBus, $"Subscriber removed from event {key.Name}");
+            _logger.Info(LogTag.EventBus, $"Subscriber removed from event {key.Name}");
         }
     }
 }

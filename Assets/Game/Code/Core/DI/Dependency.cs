@@ -1,6 +1,7 @@
 ﻿using System;
+using Game.General;
 
-namespace Cedar.Core
+namespace Game.Core
 {
     public sealed class Dependency : IDependency
     {
@@ -9,9 +10,9 @@ namespace Cedar.Core
         public DependencyLifetime Lifetime { get; }
         public object SingletonInstance { get; private set; }
 
-        private readonly ICedarLogger _logger;
+        private readonly CedarLogger _logger;
 
-        public Dependency(Type contract, Type implementation, DependencyLifetime lifetime, ICedarLogger logger)
+        public Dependency(Type contract, Type implementation, DependencyLifetime lifetime, CedarLogger logger)
         {
             ContractType = contract;
             ImplementationType = implementation;
@@ -23,7 +24,7 @@ namespace Cedar.Core
         {
             if (Lifetime != DependencyLifetime.Singleton)
             {
-                _logger.Error(SystemTag.Container, "Lifetime must be singleton when setting instance.");
+                _logger.Error(LogTag.Container, "Lifetime must be singleton when setting instance.");
                 return;
             }
 
@@ -33,7 +34,7 @@ namespace Cedar.Core
                 return;
             }
             
-            _logger.Error(SystemTag.Container,"Instance already set.");
+            _logger.Error(LogTag.Container,"Instance already set.");
         }
     }
 }

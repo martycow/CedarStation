@@ -1,4 +1,4 @@
-﻿namespace Cedar.Core
+﻿namespace Game.Core
 {
     public enum DependencyLifetime
     {

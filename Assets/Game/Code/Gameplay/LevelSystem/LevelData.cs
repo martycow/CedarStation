@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using Cedar.Core;
+using Game.Core;
 using Game.General;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace Game.Gameplay
 {
@@ -13,8 +11,8 @@ namespace Game.Gameplay
         [JsonProperty("display_name")]
         public string DisplayName;
         
-        [JsonProperty("prefab_name")]
-        public string PrefabName;
+        [JsonProperty("scene_name")]
+        public string SceneName;
         
         [JsonProperty("player_spawn_zone")]
         public VolumeData[] PlayerSpawnZones;
@@ -31,11 +29,10 @@ namespace Game.Gameplay
         public LevelData(
             Guid levelID, 
             string techName, 
-            LevelType subType, 
-            ICedarLogger logger) : base(levelID, techName, subType, logger)
+            LevelType subType) : base(levelID, techName, subType)
         {
             DisplayName = "Unnamed Level";
-            PrefabName = string.Empty;
+            SceneName = string.Empty;
             PlayerSpawnZones = Array.Empty<VolumeData>();
             OtherSpawnZones = Array.Empty<VolumeData>();
             Teleports = Array.Empty<LevelTeleportData>();
@@ -49,13 +46,10 @@ namespace Game.Gameplay
         protected override void DeserializeInternal(BaseGameData<LevelType> deserializedData)
         {
             if (deserializedData is not LevelData levelData)
-            {
-                Logger.Error(SystemTag.Data, $"Failed to deserialize LevelData. Input data is not of type LevelData. Input: {deserializedData}");
                 return;
-            }
             
             DisplayName = levelData.DisplayName;
-            PrefabName = levelData.PrefabName;
+            SceneName = levelData.SceneName;
             PlayerSpawnZones = levelData.PlayerSpawnZones;
             OtherSpawnZones = levelData.OtherSpawnZones;
             Teleports = levelData.Teleports;

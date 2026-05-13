@@ -9,7 +9,7 @@ namespace Game.Gameplay
         public event Action OnJumpRequested;
 
         public readonly ConstParam<float> Height;
-        public readonly Param<Vector2> Speed;
+        public readonly Param<Vector2> Motion;
         public readonly Param<float> JumpCooldown;
         public readonly Param<float> JumpForce;
 
@@ -19,7 +19,7 @@ namespace Game.Gameplay
             float jumpForce)
         {
             Height = new ConstParam<float>(height);
-            Speed = new Param<Vector2>();
+            Motion = new Param<Vector2>();
             JumpCooldown = new Param<float>(jumpCooldown);
             JumpForce = new Param<float>(jumpForce);
         }

@@ -1,4 +1,4 @@
-﻿using Cedar.Core;
+﻿using Game.Core;
 using Game.General;
 using Game.Input;
 using UnityEngine;
@@ -8,9 +8,10 @@ namespace Game.Gameplay
     /// <summary>
     /// Top-level scope for the entire application. Runs core systems
     /// </summary>
-    public sealed class ApplicationScope : MonoSingleton, IContainerScope
+    public sealed class ApplicationScope : MonoSingleton
     {
-        [SerializeField] private LoggerSettings loggerSettings;
+        [SerializeField] 
+        private LoggerSettings loggerSettings;
 
         public ICedarContainer Container { get; private set; }
 
@@ -18,12 +19,12 @@ namespace Game.Gameplay
 
         protected override void AwakeImpl()
         {
-            name = $"Scope_{Const.Main.ApplicationScene}";
+            name = $"Scope_{Const.Scope.ApplicationScope}";
             
             // Creating root logger
             var logger = new CedarLogger(loggerSettings);
             logger.Line();
-            logger.Info(SystemTag.Application, $"Starting {Application.productName} v{Application.version}...");
+            logger.Info(LogTag.Application, $"Starting {Application.productName} v{Application.version}...");
             logger.Line();
             
             // Creating App-level container (no parent)
@@ -34,10 +35,10 @@ namespace Game.Gameplay
             inputManager.SetState(InputStateType.NoControl);
             
             // For now - load Game scene and stuff
-            Utilities.Scenes.Load(Const.Main.GameplayScene);
+            Utilities.Scenes.Load(Const.Scope.GameplayScope);
             
             logger.Line();
-            logger.Success(SystemTag.Application, $"{Application.productName} started.");
+            logger.Success(LogTag.Application, $"{Application.productName} started.");
             logger.Line();
         }
 
@@ -52,11 +53,11 @@ namespace Game.Gameplay
             Container?.Dispose();
         }
         
-        public ICedarContainer CreateAndInitContainer(ICedarLogger logger,  ICedarContainer parent)
+        public ICedarContainer CreateAndInitContainer(CedarLogger logger,  ICedarContainer parent)
         {
             _inputActions = new InputActions();
 
-            var builder = CreateBuilder(Const.Main.ApplicationScene, logger, parent);
+            var builder = CreateBuilder(Const.Scope.ApplicationScope, logger, parent);
             var container = builder.Build();
 
             // Injecting dependencies into MonoBehaviours
@@ -68,7 +69,7 @@ namespace Game.Gameplay
             return container;
         }
 
-        public ICedarContainerBuilder CreateBuilder(string containerName, ICedarLogger logger, ICedarContainer parent = null)
+        public ICedarContainerBuilder CreateBuilder(string containerName, CedarLogger logger, ICedarContainer parent = null)
         {
             var builder = new CedarContainerBuilder(containerName, logger, parent);
 

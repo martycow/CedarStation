@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Cedar.Core;
+using Game.Core;
 using Game.General;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -18,14 +18,14 @@ namespace Game.Input
         public InputDeviceType CurrentDevice { get; private set; }
         public readonly Dictionary<InputStateType, IInputState> States = new();
         
-        private readonly ICedarLogger _logger;
+        private readonly CedarLogger _logger;
         private double _lastDeviceSwitch;
 
         public InputManager(
             GameplayInputState gameplayInputState,
             MenuInputState menuInputEvents,
             NoControlState noControlState,
-            ICedarLogger logger)
+            CedarLogger logger)
         {
             States[InputStateType.Gameplay] = gameplayInputState;
             States[InputStateType.Menu] = menuInputEvents;
@@ -47,7 +47,7 @@ namespace Game.Input
         {
             if (!States.ContainsKey(stateType))
             {
-                _logger.Error(SystemTag.Input, $"State {stateType} not found in InputManager.");
+                _logger.Error(LogTag.Input, $"State {stateType} not found in InputManager.");
                 return;
             }
             
@@ -55,7 +55,7 @@ namespace Game.Input
             CurrentStateType = stateType;
             States[CurrentStateType].Enable();
             
-            _logger.Info(SystemTag.Input, $"State changed to: {CurrentStateType}");
+            _logger.Info(LogTag.Input, $"State changed to: {CurrentStateType}");
             OnStateChanged?.Invoke(stateType);
         }
         
@@ -72,7 +72,7 @@ namespace Game.Input
             CurrentDevice = deviceType;
             _lastDeviceSwitch = now;
             
-            _logger.Info(SystemTag.Input, $"Input device changed to: {CurrentDevice}");
+            _logger.Info(LogTag.Input, $"Input device changed to: {CurrentDevice}");
             OnDeviceChanged?.Invoke(deviceType);
         }
         

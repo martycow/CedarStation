@@ -1,5 +1,4 @@
 ﻿using System;
-using Cedar.Core;
 using Newtonsoft.Json;
 
 namespace Game.General
@@ -23,17 +22,13 @@ namespace Game.General
         [JsonProperty("sub_type")] 
         public TSubData SubType;
 
-        [JsonIgnore]
-        public ICedarLogger Logger { get; private set; }
-
         protected BaseGameData() { }
 
-        protected BaseGameData(Guid id, string techName, TSubData subType, ICedarLogger logger)
+        protected BaseGameData(Guid id, string techName, TSubData subType)
         {
             ID = id;
             TechName = techName;
             SubType = subType;
-            Logger = logger;
         }
         
         protected abstract GameDataType ConcreteDataType { get; }
@@ -41,7 +36,6 @@ namespace Game.General
         public string Serialize()
         {
             var result = SerializeInternal();
-            Logger.Success(SystemTag.Data, $"Data serialization completed for {GetType().Name}. Result: {result}");
             return result;
         }
 
@@ -49,10 +43,7 @@ namespace Game.General
         {
             var deserializedData = JsonConvert.DeserializeObject<BaseGameData<TSubData>>(inputData);
             if (deserializedData == null)
-            {
-                Logger.Error(SystemTag.Data, $"Failed to deserialize data {GetType().Name} with input: {inputData}");
                 return;
-            }
             
             ID = deserializedData.ID;
             TechName = deserializedData.TechName;

@@ -1,5 +1,5 @@
 ﻿using System;
-using Cedar.Core;
+using Game.Core;
 using Game.General;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -13,7 +13,9 @@ namespace Game.Gameplay
         private readonly LevelManager _levelManager;
         private readonly SaveManager _saveManager;
         private readonly LevelDataStorage _levelDataStorage;
-        private readonly ICedarLogger _logger;
+        private readonly CedarLogger _logger;
+        
+        private GameContext _gameContext;
 
         public GameManager(
             PlayerController playerController,
@@ -21,7 +23,7 @@ namespace Game.Gameplay
             LevelManager levelManager,
             SaveManager saveManager,
             LevelDataStorage levelDataStorage,
-            ICedarLogger logger)
+            CedarLogger logger)
         {
             _playerController = playerController;
             _inputManager = inputManager;
@@ -38,17 +40,23 @@ namespace Game.Gameplay
         
         public void Dispose()
         {
-            _playerController.DestroyPlayer();
+            _playerController.KillPlayer();
         }
 
         private void StartNewGame()
         {
-            _logger.Info(SystemTag.Gameplay, "Starting new game...");
-
+            if (_gameContext != null)
+            {
+                _logger.Fail(LogTag.Gameplay, "Game context already exists. Cannot start a new game.");
+                return;
+            }
+            
+            _logger.Info(LogTag.Gameplay, "Starting new game...");
+            
             var defaultLevel = _levelDataStorage.DefaultLevel;
             if (defaultLevel == null)
             {
-                _logger.Error(SystemTag.Gameplay, "No default level found in LevelDataStorage.");
+                _logger.Error(LogTag.Gameplay, "No default level found in LevelDataStorage.");
                 return;
             }
             
@@ -63,16 +71,34 @@ namespace Game.Gameplay
             StartGameWithSaveSlot(emptySlotData);
         }
 
-        private void StartGameWithSaveSlot(SaveSlotData saveSlotData)
+        private async void StartGameWithSaveSlot(SaveSlotData saveSlotData)
         {
-            var (level, levelData) = _levelManager.LoadLevel(saveSlotData.LevelID);
-            
-            _inputManager.SetState(InputStateType.Gameplay);
-            _playerController.SpawnPlayer(saveSlotData.SpawnPosition, saveSlotData.SpawnRotation);
-            
-            _logger.Line();
-            _logger.Success(SystemTag.Gameplay, "Game started.");
-            _logger.Line();
+            try
+            {
+                var levelComponents = await _levelManager.LoadLevel(saveSlotData.LevelID);
+                
+                if (levelComponents.IsSuccess)
+                {
+                    _logger.Success(LogTag.Gameplay, $"Level {levelComponents.Data.DisplayName} loaded successfully.");
+                
+                    _inputManager.SetState(InputStateType.Gameplay);
+                    var playerComponents = _playerController.SpawnPlayer(saveSlotData.SpawnPosition, saveSlotData.SpawnRotation);
+                    
+                    _logger.Info(LogTag.Gameplay, "Initializing game context...");
+                    _gameContext = new GameContext
+                    {
+                        SaveSlot = saveSlotData,
+                        Level = levelComponents,
+                        Player = playerComponents
+                    };
+
+                    _logger.Success(LogTag.Gameplay, "Game started.");
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error(LogTag.Gameplay, $"Exception: {e}");
+            }
         }
     }
 }

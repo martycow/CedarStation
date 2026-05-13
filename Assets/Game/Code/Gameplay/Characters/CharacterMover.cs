@@ -41,7 +41,7 @@ namespace Game.Gameplay
 
         protected override void UpdateView()
         {
-            var speed = Context.Speed.Value;
+            var speed = Context.Motion.Value;
             
             animator.SetFloat(Const.Character.AnimationParameters.MoveInputX, speed.x);
             animator.SetFloat(Const.Character.AnimationParameters.MoveInputY, speed.y);
@@ -81,22 +81,20 @@ namespace Game.Gameplay
             var radius = groundCollider.radius;
             
             var overlapCount = Physics.OverlapSphereNonAlloc(origin, radius, _overlappingGroundColliders, Const.Physics.GroundLayer, QueryTriggerInteraction.Ignore);
-
-            var hasCollision = overlapCount > 0;
-            if (hasCollision)
-            {
-                for (var i = 0; i < overlapCount; i++)
-                {
-                    var other = _overlappingGroundColliders[i];
-                    if (other == null) 
-                        continue;
-                    
-                    Debug.DrawLine(origin, other.ClosestPoint(origin), Color.gold, 0.1f);
-                    DebugTools.DrawCircle(origin, radius, Color.gold, 16, 0.1f);
-                }
-            }
+            if (overlapCount == 0) 
+                return false;
             
-            return hasCollision;
+            for (var i = 0; i < overlapCount; i++)
+            {
+                var other = _overlappingGroundColliders[i];
+                if (other == null) 
+                    continue;
+                    
+                Debug.DrawLine(origin, other.ClosestPoint(origin), Color.gold, 0.1f);
+                DebugTools.DrawCircle(origin, radius, Color.gold, 16, 0.1f);
+            }
+
+            return true;
         }
         
         private void OnJumpRequested()

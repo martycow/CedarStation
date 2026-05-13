@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Cedar.Core
+namespace Game.Core
 {
     public interface IDependency
     {

@@ -1,5 +1,5 @@
 ﻿using System;
-using Cedar.Core;
+using Game.Core;
 using Game.General;
 
 namespace Game.Input
@@ -7,10 +7,10 @@ namespace Game.Input
     public abstract class BaseInputState : IInputState
     {
         public abstract InputStateType StateType { get; }
-        protected readonly ICedarLogger Logger;
+        protected readonly CedarLogger Logger;
         protected readonly InputActions InputActions;
 
-        protected BaseInputState(InputActions inputActions, ICedarLogger logger)
+        protected BaseInputState(InputActions inputActions, CedarLogger logger)
         {
             Logger = logger;
             InputActions = inputActions;

@@ -1,5 +1,4 @@
 ﻿using System;
-using Cedar.Core;
 using Newtonsoft.Json;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -23,8 +22,7 @@ namespace Game.General
         public VolumeData(
             Guid id, 
             string techName,
-            VolumeShape subShape,
-            ICedarLogger logger) : base(id, techName, subShape, logger)
+            VolumeShape subShape) : base(id, techName, subShape)
         {
             Center = Vector3.zero;
             Size = Vector3.one;
@@ -47,10 +45,7 @@ namespace Game.General
         protected override void DeserializeInternal(BaseGameData<VolumeShape> inputData)
         {
             if (inputData is not VolumeData volumeData)
-            {
-                Logger.Error(SystemTag.Data, $"Failed to deserialize VolumeData. Input data is not of type VolumeData. Input: {inputData}");
                 return;
-            }
             
             Center = volumeData.Center;
             Size = volumeData.Size;

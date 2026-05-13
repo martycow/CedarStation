@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Game.General;
 
-namespace Cedar.Core
+namespace Game.Core
 {
     public sealed class CedarContainer : ICedarContainer
     {
         public Dictionary<Type, IDependency> RegisteredDependencies { get; } = new();
         
         private readonly string _containerName;
-        private readonly ICedarLogger _logger;
+        private readonly CedarLogger _logger;
         private readonly ICedarContainer? _parent;
         private readonly HashSet<Type> _resolving = new();
         private readonly List<IInitializable>  _initializers = new();
@@ -18,31 +19,31 @@ namespace Cedar.Core
         private readonly Dictionary<Type, (ConstructorInfo Ctor, ParameterInfo[] Params)> _constructorCache = new();
         private readonly Dictionary<Type, (MethodInfo Method, ParameterInfo[] Params)[]> _injectCache = new();
 
-        public CedarContainer(string containerName, IEnumerable<IDependency> dependencies, ICedarLogger logger, ICedarContainer? parent = null)
+        public CedarContainer(string containerName, IEnumerable<IDependency> dependencies, CedarLogger logger, ICedarContainer? parent = null)
         {
             _containerName = containerName;
             _logger = logger;
             _parent = parent;
             
-            logger.Info(SystemTag.Container, $"[{_containerName}] Registering dependencies...");
+            logger.Info(LogTag.Container, $"[{_containerName}] Registering dependencies...");
             foreach (var dependency in dependencies)
             {
                 if (RegisteredDependencies.TryAdd(dependency.ContractType, dependency))
                 {
-                    _logger.Info(SystemTag.Container, $"[{_containerName}] Registered {dependency.ContractType.Name} -> {dependency.ImplementationType.Name} ({dependency.Lifetime}).");
+                    _logger.Info(LogTag.Container, $"[{_containerName}] Registered {dependency.ContractType.Name} -> {dependency.ImplementationType.Name} ({dependency.Lifetime}).");
                     CacheConstructor(dependency);
                     continue;
                 }
 
-                _logger.Error(SystemTag.Container, $"[{_containerName}] Type {dependency.ContractType.Name} is already registered.");
+                _logger.Error(LogTag.Container, $"[{_containerName}] Type {dependency.ContractType.Name} is already registered.");
             }
             
-            logger.Info(SystemTag.Container, $"[{_containerName}] Registered {RegisteredDependencies.Count} dependencies.");
+            logger.Info(LogTag.Container, $"[{_containerName}] Registered {RegisteredDependencies.Count} dependencies.");
         }
         
         public void Initialize()
         {
-            _logger.Info(SystemTag.Container, $"[{_containerName}] Initializing dependencies ({RegisteredDependencies.Count})...");
+            _logger.Info(LogTag.Container, $"[{_containerName}] Initializing dependencies ({RegisteredDependencies.Count})...");
 
             foreach (var dependency in RegisteredDependencies.Values)
             {
@@ -54,42 +55,42 @@ namespace Cedar.Core
             {
                 try
                 {
-                    _logger.Info(SystemTag.Container, $"[{_containerName}] Initializing {t.GetType().Name}...");
+                    _logger.Info(LogTag.Container, $"[{_containerName}] Initializing {t.GetType().Name}...");
                     t.Initialize();
-                    _logger.Success(SystemTag.Container, $"[{_containerName}] {t.GetType().Name} initialized.");
+                    _logger.Success(LogTag.Container, $"[{_containerName}] {t.GetType().Name} initialized.");
                 }
                 catch (Exception e)
                 {
-                    _logger.Fail(SystemTag.Container, $"[{_containerName}] Error initializing {t.GetType().Name}: {e.Message}.");
+                    _logger.Fail(LogTag.Container, $"[{_containerName}] Error initializing {t.GetType().Name}: {e.Message}.");
                     return;
                 }
             }
             
-            _logger.Success(SystemTag.Container, $"[{_containerName}] Container Initialized!");
+            _logger.Success(LogTag.Container, $"[{_containerName}] Container Initialized!");
         }
 
         public void Dispose()
         {
-            _logger.Info(SystemTag.Container, $"[{_containerName}] Disposing...");
+            _logger.Info(LogTag.Container, $"[{_containerName}] Disposing...");
             for (var i = _disposables.Count - 1; i >= 0; i--)
             {
                 var t = _disposables[i];
                 try
                 {
-                    _logger.Info(SystemTag.Container, $"[{_containerName}] Disposing {t.GetType().Name}...");
+                    _logger.Info(LogTag.Container, $"[{_containerName}] Disposing {t.GetType().Name}...");
                     _disposables[i].Dispose();
-                    _logger.Success(SystemTag.Container, $"[{_containerName}] {t.GetType().Name} disposed.");
+                    _logger.Success(LogTag.Container, $"[{_containerName}] {t.GetType().Name} disposed.");
                 }
                 catch (Exception e)
                 {
-                    _logger.Fail(SystemTag.Container, $"[{_containerName}] Error disposing {_disposables[i].GetType().Name}: {e.Message}.");
+                    _logger.Fail(LogTag.Container, $"[{_containerName}] Error disposing {_disposables[i].GetType().Name}: {e.Message}.");
                     return;
                 }
             }
             
             _disposables.Clear();
             RegisteredDependencies.Clear();
-            _logger.Success(SystemTag.Container, $"[{_containerName}] Container Disposed!");
+            _logger.Success(LogTag.Container, $"[{_containerName}] Container Disposed!");
         }
 
         public T Resolve<T>()
@@ -100,7 +101,7 @@ namespace Cedar.Core
             }
             catch (Exception e)
             {
-                _logger.Error(SystemTag.Container, $"[{_containerName}] Error resolving {typeof(T).Name}: {e.Message}");
+                _logger.Error(LogTag.Container, $"[{_containerName}] Error resolving {typeof(T).Name}: {e.Message}");
                 throw;
             }
         }
@@ -134,7 +135,7 @@ namespace Cedar.Core
             }
             catch (Exception e)
             {
-                _logger.Error(SystemTag.Container, $"[{_containerName}] Error injecting dependencies into {target.GetType().Name}: {e.Message}");
+                _logger.Error(LogTag.Container, $"[{_containerName}] Error injecting dependencies into {target.GetType().Name}: {e.Message}");
                 throw;
             }
         }
@@ -156,7 +157,7 @@ namespace Cedar.Core
         {
             if (!RegisteredDependencies.TryGetValue(type, out var entry))
             {
-                if(_parent != null)
+                if (_parent != null)
                     return _parent.Resolve(type);
                 
                 throw new InvalidOperationException($"[{_containerName}] Type {type} is not registered in the container.");

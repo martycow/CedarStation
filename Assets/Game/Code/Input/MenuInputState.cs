@@ -1,5 +1,5 @@
 ﻿using System;
-using Cedar.Core;
+using Game.Core;
 using Game.General;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -16,7 +16,7 @@ namespace Game.Input
         
         public override InputStateType StateType => InputStateType.Menu;
 
-        public MenuInputState(InputActions inputActions, ICedarLogger logger) : base(inputActions, logger) { }
+        public MenuInputState(InputActions inputActions, CedarLogger logger) : base(inputActions, logger) { }
         
         public override void Initialize()
         {
@@ -45,7 +45,7 @@ namespace Game.Input
             {
                 case InputActionPhase.Performed:
                     var value = context.ReadValue<Vector2>();
-                    Logger.Info(SystemTag.Input, $"Navigate: {value}");
+                    Logger.Info(LogTag.Input, $"Navigate: {value}");
                     Navigate?.Invoke(value);
                     break;
             }
@@ -57,7 +57,7 @@ namespace Game.Input
             {
                 case InputActionPhase.Performed:
                     var value = context.ReadValue<Vector2>();
-                    Logger.Info(SystemTag.Input, $"Point: {value}");
+                    Logger.Info(LogTag.Input, $"Point: {value}");
                     Navigate?.Invoke(value);
                     break;
             }
@@ -68,7 +68,7 @@ namespace Game.Input
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
-                    Logger.Info(SystemTag.Input, $"Confirm");
+                    Logger.Info(LogTag.Input, $"Confirm");
                     Confirm?.Invoke();
                     break;
             }
@@ -79,7 +79,7 @@ namespace Game.Input
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
-                    Logger.Info(SystemTag.Input, $"Back");
+                    Logger.Info(LogTag.Input, $"Back");
                     Back?.Invoke();
                     break;
             }
@@ -90,7 +90,7 @@ namespace Game.Input
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
-                    Logger.Info(SystemTag.Input, $"CloseMenu");
+                    Logger.Info(LogTag.Input, $"CloseMenu");
                     CloseMenu?.Invoke();
                     break;
             }

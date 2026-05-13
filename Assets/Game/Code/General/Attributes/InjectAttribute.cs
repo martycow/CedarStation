@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Cedar.Core
+namespace Game.General
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class InjectAttribute : Attribute { }

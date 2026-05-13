@@ -1,5 +1,5 @@
 ﻿using System;
-using Cedar.Core;
+using Game.Core;
 using Game.General;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -21,15 +21,13 @@ namespace Game.Gameplay
         public LevelTeleportData(
             Guid id,
             string techName,
-            TeleportType subType,
-            ICedarLogger logger) : base(id, techName, subType, logger)
+            TeleportType subType) : base(id, techName, subType)
         {
             DestinationID = Guid.Empty;
             TeleportZone = new VolumeData(
                 Guid.NewGuid(),
                 techName,
-                VolumeShape.Box,
-                logger);
+                VolumeShape.Box);
         }
 
         protected override string SerializeInternal()
@@ -40,10 +38,7 @@ namespace Game.Gameplay
         protected override void DeserializeInternal(BaseGameData<TeleportType> deserializedData)
         {
             if (deserializedData is not LevelTeleportData teleportData)
-            {
-                Logger.Error(SystemTag.Data, $"Failed to deserialize LevelTeleportData. Input data is not of type LevelTeleportData. Input: {deserializedData}");
                 return;
-            }
             
             DestinationID = teleportData.DestinationID;
             TeleportZone = teleportData.TeleportZone;

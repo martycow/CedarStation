@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Cedar.Core;
+using Game.Core;
 using Game.General;
 using UnityEngine;
 
@@ -8,13 +8,13 @@ namespace Game.Gameplay
     public class CharacterEmotionContext
     {
         public readonly CharacterVisual Visual;
-        public readonly ICedarLogger Logger;
+        public readonly CedarLogger Logger;
         public readonly Dictionary<EmotionType, SkinnedMeshRenderer[]> EmotionRenderMap = new();
         public readonly Dictionary<EmotionType, int[]> EmotionBlendShapeMap = new();
         
         public EmotionType CurrentEmotion { get; private set; } = EmotionType.None;
         
-        public CharacterEmotionContext(CharacterVisual visual, ICedarLogger logger)
+        public CharacterEmotionContext(CharacterVisual visual, CedarLogger logger)
         {
             Visual = visual;
             Logger = logger;
@@ -26,7 +26,7 @@ namespace Game.Gameplay
         {
             if (Visual == null)
             {
-                Logger.Error(SystemTag.Emotion, "Character Renderers is null");
+                Logger.Error(LogTag.Emotion, "Character Renderers is null");
                 return;
             }
             
@@ -91,7 +91,7 @@ namespace Game.Gameplay
             
             if (!EmotionRenderMap.TryGetValue(emotion, out var renderers))
             {
-                Logger.Error(SystemTag.Emotion, $"Emotion {emotion} not found in EmotionMap");
+                Logger.Error(LogTag.Emotion, $"Emotion {emotion} not found in EmotionMap");
                 return;
             }
 

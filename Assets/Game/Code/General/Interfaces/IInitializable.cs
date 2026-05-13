@@ -1,4 +1,4 @@
-﻿namespace Cedar.Core
+﻿namespace Game.General
 {
     public interface IInitializable
     {

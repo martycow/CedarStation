@@ -1,19 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cedar.Core;
 using Game.General;
+using Unity.Cinemachine;
 using UnityEngine;
 
 namespace Game.Gameplay
 {
     public sealed class Level : ContextView<LevelData>
     {
-        private readonly Dictionary<Guid, VolumeBox> _spawnedVolumeBoxes = new();
+        [SerializeField]
+        private CinemachineCamera cinemachineCamera;
+
+        [SerializeField]
+        private List<VolumeBox> spawnedVolumeBoxes;
         
+        private GameObject _collidersParent;
+        private GameObject _cinemachineParent;
+
         protected override void Init()
         {
-            gameObject.name = Context.TechName;
+            gameObject.name = $"Level_{Context.TechName}";
             
+            InitRoots();
             SpawnVolumeBoxes();
         }
 
@@ -21,51 +29,55 @@ namespace Game.Gameplay
         {
             
         }
+
+        private void InitRoots()
+        {
+            _collidersParent = new GameObject("Colliders");
+            _collidersParent.transform.SetParent(transform);
+
+            _cinemachineParent = new GameObject("Cinemachine");
+            _cinemachineParent.transform.SetParent(transform);
+        }
         
         private void SpawnVolumeBoxes()
         {
-            _spawnedVolumeBoxes.Clear();
+            spawnedVolumeBoxes.Clear();
             
             // Player Spawn Zones
-            for (var i = 0; i < Context.PlayerSpawnZones.Length; i++)
+            foreach (var volumeData in Context.PlayerSpawnZones)
             {
-                var zone = Context.PlayerSpawnZones[i];
-
                 var go = new GameObject();
-                go.transform.SetParent(transform);
-                var volumeBox = go.AddComponent<VolumeBox>();
-                volumeBox.Setup(zone, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
+                go.transform.SetParent(_collidersParent.transform);
                 
-                _spawnedVolumeBoxes[zone.ID] = volumeBox;
+                var volumeBox = go.AddComponent<VolumeBox>();
+                volumeBox.Setup(volumeData, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
+
+                spawnedVolumeBoxes.Add(volumeBox);
             }
             
             // Teleports
-            for (var i = 0; i < Context.Teleports.Length; i++)
+            foreach (var teleportData in Context.Teleports)
             {
-                var zone = Context.Teleports[i].TeleportZone;
+                var volumeData = teleportData.TeleportZone;
                 
                 var go = new GameObject();
-                go.transform.SetParent(transform);
+                go.transform.SetParent(_collidersParent.transform);
                 var volumeBox = go.AddComponent<VolumeBox>();
-                volumeBox.Setup(zone, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
+                volumeBox.Setup(volumeData, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
                 
-                _spawnedVolumeBoxes[zone.ID] = volumeBox;
+                spawnedVolumeBoxes.Add(volumeBox);
             }
             
             // Other Spawn Zones
-            for (var i = 0; i < Context.OtherSpawnZones.Length; i++)
+            foreach (var volumeData in Context.OtherSpawnZones)
             {
-                var zone = Context.OtherSpawnZones[i];
-                
                 var go = new GameObject();
-                go.transform.SetParent(transform);
+                go.transform.SetParent(_collidersParent.transform);
                 var volumeBox = go.AddComponent<VolumeBox>();
-                volumeBox.Setup(zone, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
+                volumeBox.Setup(volumeData, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
                 
-                _spawnedVolumeBoxes[zone.ID] = volumeBox;
+                spawnedVolumeBoxes.Add(volumeBox);
             }
-            
-            Context.Logger.Info(SystemTag.Level, $"Spawned {_spawnedVolumeBoxes.Count} volume boxes for level {Context.TechName}");
         }
     }
 }

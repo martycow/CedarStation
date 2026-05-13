@@ -14,7 +14,11 @@ namespace Game.General
     
     public abstract class ContextView<TContext> : MonoBehaviour where TContext: class
     {
-        protected TContext Context { get; private set; }
+        public TContext Context { get; private set; }
+        
+        public Transform Transform => transform;
+        public Vector3 Position => transform.position;
+        public Quaternion Rotation => transform.rotation;
         
         private bool _isInitialized;
         private ContextViewUpdateType _updateType;

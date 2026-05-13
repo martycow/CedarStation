@@ -1,5 +1,5 @@
 ﻿using System;
-using Cedar.Core;
+using Game.Core;
 using Game.General;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -30,8 +30,7 @@ namespace Game.Gameplay
             GameDifficulty difficulty,
             Guid levelID,
             Vector3 spawnPosition,
-            Quaternion spawnRotation,
-            ICedarLogger logger) : base(id, GenerateSaveSlotName(id, difficulty), difficulty, logger)
+            Quaternion spawnRotation) : base(id, GenerateSaveSlotName(id, difficulty), difficulty)
         {
             LevelID = levelID;
             SpawnPosition = spawnPosition;
@@ -52,10 +51,7 @@ namespace Game.Gameplay
         protected override void DeserializeInternal(BaseGameData<GameDifficulty> deserializedData)
         {
             if (deserializedData is not SaveSlotData saveSlot)
-            {
-                Logger.Error(SystemTag.Save, $"Failed to deserialize save slot with ID {ID}.");
                 return;
-            }
             
             LevelID = saveSlot.LevelID;
             SpawnPosition = saveSlot.SpawnPosition;

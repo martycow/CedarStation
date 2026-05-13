@@ -1,4 +1,5 @@
-﻿using Cedar.Core;
+﻿using Game.Core;
+using Game.General;
 
 namespace Game.Input
 {
@@ -6,7 +7,7 @@ namespace Game.Input
     {
         public override InputStateType StateType => InputStateType.NoControl;
         
-        public NoControlState(InputActions inputActions, ICedarLogger logger) : base(inputActions, logger) { }
+        public NoControlState(InputActions inputActions, CedarLogger logger) : base(inputActions, logger) { }
         
         public override void Initialize()
         {

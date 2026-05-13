@@ -1,99 +1,129 @@
 ﻿using System;
 using System.Collections.Generic;
-using Cedar.Core;
+using System.Threading.Tasks;
+using Game.Core;
 using Game.General;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace Game.Gameplay
 {
+    public struct LevelComponents
+    {
+        public bool IsSuccess;
+        public Scene LoadedScene;
+        public Level Level;
+        public LevelData Data;
+        
+        public LevelComponents(bool isSuccess, Scene loadedScene, Level level, LevelData data)
+        {
+            IsSuccess = isSuccess;
+            LoadedScene = loadedScene;
+            Level = level;
+            Data = data;
+        }
+
+        public static LevelComponents Fail() => new(false, default, null, null);
+        public static LevelComponents Success(Scene loadedScene, Level level, LevelData data) => new(true, loadedScene, level, data);
+    }
+    
     public sealed class LevelManager
     {
-        private readonly PlayerSpawner _playerSpawner;
         private readonly LevelDataStorage _levelDataStorage;
-        private readonly ICedarLogger _logger;
-        private readonly Dictionary<Guid, (Level level, LevelData levelData)> _loadedLevels = new();
-        private readonly GameObject _levelsRoot;
+        private readonly CedarLogger _logger;
+        private readonly Dictionary<Guid, LevelComponents> _loadedLevels = new();
         
+        private Scene _currentScene;
         private Level _currentLevel;
         private LevelData _currentLevelData;
 
-        public LevelManager(PlayerSpawner playerSpawner, LevelDataStorage levelDataStorage, ICedarLogger logger)
+        public LevelManager(LevelDataStorage levelDataStorage, CedarLogger logger)
         {
-            _playerSpawner = playerSpawner;
             _levelDataStorage = levelDataStorage;
             _logger = logger;
-            
-            _levelsRoot = new GameObject("Levels");
         }
 
-        public (Level level, LevelData levelData) LoadLevel(Guid levelID)
+        public async Task<LevelComponents> LoadLevel(Guid levelID)
         {
             // Search level's settings
             if (!_levelDataStorage.LevelDataById.TryGetValue(levelID, out var levelData))
             {
-                _logger.Error(SystemTag.Level, $"Level with ID {levelID} not found.");
-                return (null, null);
+                _logger.Error(LogTag.Level, $"Level with ID {levelID} not found.");
+                return LevelComponents.Fail();
             }
 
             // Check if it's duplicate invoke
-            if (_currentLevelData != null && _currentLevelData.ID == levelID)
+            if (_currentScene.isLoaded && _currentLevelData != null && _currentLevelData.ID == levelID)
             {
-                _logger.Warn(SystemTag.Level, $"Level with ID {levelID} is already loaded.");
-                return (_currentLevel, _currentLevelData);
+                _logger.Warn(LogTag.Level, $"Level with ID {levelID} is already loaded.");
+                return new LevelComponents(true, _currentScene, _currentLevel, _currentLevelData);
             }
 
             // Hiding current level if we have one 
             if (_currentLevelData != null)
                 HideLevel(_currentLevelData.ID);
+            
             _currentLevelData = null;
             _currentLevel = null;
             
             // Loading level
-            if (_loadedLevels.TryGetValue(levelID, out var loadedLevel))
+            if (_loadedLevels.TryGetValue(levelID, out var loadResult))
             {
-                _logger.Info(SystemTag.Level, $"Level with ID {levelID} is already loaded.");
+                _logger.Info(LogTag.Level, $"Level with ID {levelID} is already loaded.");
                 
-                loadedLevel.level.gameObject.SetActive(true);
-                _currentLevel = loadedLevel.level;
-                _currentLevelData = loadedLevel.levelData;
+                loadResult.Level.gameObject.SetActive(true);
+                _currentScene = loadResult.LoadedScene;
+                _currentLevel = loadResult.Level;
+                _currentLevelData = loadResult.Data;
             }
             else
             {
-                _logger.Info(SystemTag.Level, $"Creating new level instance for Level ID: {levelID}.");
+                _logger.Info(LogTag.Level, $"Loading scene {levelData.SceneName}...");
+                var scene = await Utilities.Scenes.LoadAsync(levelData.SceneName);
+                _logger.Info(LogTag.Level, "Scene loaded. Searching for Level object...");
                 
-                var prefab = Resources.Load<Level>($"Levels/{levelData.PrefabName}");
-                if (prefab == null)
+                Level levelRoot = null;
+                
+                foreach (var gameObject in scene.GetRootGameObjects())
                 {
-                    _logger.Error(SystemTag.Level, $"Level prefab with name {levelData.PrefabName} not found in Resources/Prefabs/Levels.");
-                    return (null, null);
+                    levelRoot = gameObject.GetComponent<Level>();
+                    if (levelRoot != null)
+                        break;
                 }
 
-                var levelInstance = Object.Instantiate(prefab, _levelsRoot.transform);
+                if (levelRoot == null)
+                {
+                    levelRoot = new GameObject("LevelRoot").AddComponent<Level>();
+                    _logger.Info(LogTag.Level, $"Level object not found in scene {levelData.SceneName}. Created new one.");
+                }
                 
+                // Binding data to level object
                 var data = new LevelData(
                     levelData.ID, 
                     levelData.TechName, 
-                    levelData.SubType, 
-                    _logger);
+                    levelData.SubType);
                 
-                levelInstance.Setup(data, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
-                
-                _currentLevel = levelInstance;
+                levelRoot.Setup(data, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
+
+                _currentScene = scene;
+                _currentLevel = levelRoot;
                 _currentLevelData = levelData;
-                _loadedLevels[levelID] = (levelInstance, levelData);
+                _loadedLevels[levelID] = LevelComponents.Success(scene, levelRoot, levelData);
             }
             
-            return (_currentLevel, _currentLevelData);
+            return new LevelComponents(true, _currentScene, _currentLevel, _currentLevelData);
         }
 
         private void HideLevel(Guid levelID)
         {
             if (_loadedLevels.TryGetValue(levelID, out var loaded))
             {
-                _logger.Info(SystemTag.Level, $"Hiding level with ID {levelID}.");
-                loaded.level.gameObject.SetActive(false);
+                _logger.Info(LogTag.Level, $"Hiding level with ID {levelID}.");
+                loaded.Level.gameObject.SetActive(false);
             }
+            
+            //SceneManager.UnloadSceneAsync(_currentScene);
         }
 
         private void Clear()

@@ -1,5 +1,5 @@
 ﻿using System;
-using Cedar.Core;
+using Game.Core;
 using Game.General;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -23,7 +23,7 @@ namespace Game.Input
         
         public override InputStateType StateType => InputStateType.Gameplay;
         
-        public GameplayInputState(InputActions inputActions, ICedarLogger logger) : base(inputActions, logger) { }
+        public GameplayInputState(InputActions inputActions, CedarLogger logger) : base(inputActions, logger) { }
         
         public override void Initialize()
         {
@@ -73,7 +73,7 @@ namespace Game.Input
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
-                    Logger.Info(SystemTag.Input, "Jump");
+                    Logger.Info(LogTag.Input, "Jump");
                     Jump?.Invoke();
                     break;
             }
@@ -122,7 +122,7 @@ namespace Game.Input
             switch (context.phase)
             {
                 case  InputActionPhase.Performed:
-                    Logger.Info(SystemTag.Input, "Tool");
+                    Logger.Info(LogTag.Input, "Tool");
                     Tool?.Invoke();
                     break;
             }
@@ -133,7 +133,7 @@ namespace Game.Input
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
-                    Logger.Info(SystemTag.Input, "Interact");
+                    Logger.Info(LogTag.Input, "Interact");
                     Interact?.Invoke();
                     break;
             }
@@ -144,7 +144,7 @@ namespace Game.Input
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
-                    Logger.Info(SystemTag.Input, "Kick");
+                    Logger.Info(LogTag.Input, "Kick");
                     Kick?.Invoke();
                     break;
             }
@@ -155,7 +155,7 @@ namespace Game.Input
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
-                    Logger.Info(SystemTag.Input, "Crouch");
+                    Logger.Info(LogTag.Input, "Crouch");
                     Crouch?.Invoke();
                     break;
             }
@@ -166,7 +166,7 @@ namespace Game.Input
             switch (context.phase)
             {
                 case InputActionPhase.Performed:
-                    Logger.Info(SystemTag.Input, "Open Menu");
+                    Logger.Info(LogTag.Input, "Open Menu");
                     OpenMenu?.Invoke();
                     break;
             }

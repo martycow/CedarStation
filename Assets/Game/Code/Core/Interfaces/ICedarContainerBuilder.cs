@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Cedar.Core
+namespace Game.Core
 {
     public interface ICedarContainerBuilder
     {

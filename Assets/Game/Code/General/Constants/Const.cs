@@ -5,11 +5,11 @@ namespace Game.General
 {
     public static partial class Const
     {
-        public static class Main
+        public static class Scope
         {
-            public const string ApplicationScene = "Application";
-            public const string GameplayScene = "Gameplay";
-            public const string MenuScene = "Menu";
+            public const string ApplicationScope = "Application";
+            public const string GameplayScope = "Gameplay";
+            public const string MenuScope = "Menu";
         }
 
         public static class Physics

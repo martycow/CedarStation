@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Game.General;
 
-namespace Cedar.Core
+namespace Game.Core
 {
     public sealed class CedarContainerBuilder : ICedarContainerBuilder
     {
@@ -8,10 +9,10 @@ namespace Cedar.Core
         
         private readonly List<IDependency> _dependencies = new();
         private readonly string _containerName;
-        private readonly ICedarLogger _logger;
+        private readonly CedarLogger _logger;
         private readonly ICedarContainer _parent;
 
-        public CedarContainerBuilder(string containerName, ICedarLogger cedarLogger, ICedarContainer parent)
+        public CedarContainerBuilder(string containerName, CedarLogger cedarLogger, ICedarContainer parent)
         {
             _containerName = containerName;
             _logger = cedarLogger;

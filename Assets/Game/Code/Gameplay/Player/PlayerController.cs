@@ -1,4 +1,4 @@
-﻿using Cedar.Core;
+﻿using Game.Core;
 using Game.General;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -11,7 +11,7 @@ namespace Game.Gameplay
         private readonly PlayerSettings _playerSettings;
         private readonly EventBus _eventBus;
         private readonly PlayerSpawner _playerSpawner;
-        private readonly ICedarLogger _logger;
+        private readonly CedarLogger _logger;
         
         private CharacterMover _characterMover;
         private PlayerMovementContext _playerMovementContext;
@@ -20,7 +20,7 @@ namespace Game.Gameplay
         
         private CharacterVisual _playerVisual;
 
-        public PlayerController(IGameplayInputEvents gameplayGameplayInputEvents, PlayerSettings playerSettings, EventBus eventBus, PlayerSpawner playerSpawner, ICedarLogger logger)
+        public PlayerController(IGameplayInputEvents gameplayGameplayInputEvents, PlayerSettings playerSettings, EventBus eventBus, PlayerSpawner playerSpawner, CedarLogger logger)
         {
             _gameplayInputEvents = gameplayGameplayInputEvents;
             _playerSettings = playerSettings;
@@ -29,14 +29,14 @@ namespace Game.Gameplay
             _logger = logger;
         }
 
-        public void SpawnPlayer(Vector3 spawnPosition, Quaternion spawnRotation)
+        public PlayerComponents SpawnPlayer(Vector3 spawnPosition, Quaternion spawnRotation)
         {
-            _logger.Info(SystemTag.Player, "Spawning player");
+            _logger.Info(LogTag.Player, "Spawning player...");
             
-            if (_characterMover != null)
+            if (_playerSpawner.Player.IsSpawned)
             {
-                _logger.Error(SystemTag.Gameplay, "Player already exists.");
-                return;
+                _logger.Error(LogTag.Gameplay, "Player already exists.");
+                return PlayerComponents.Empty;
             }
 
             // Spawning
@@ -64,32 +64,34 @@ namespace Game.Gameplay
             _characterEmotions.Setup(_characterEmotionContext, ContextViewUpdateType.OnSetup |
                                                                ContextViewUpdateType.EveryFrame);
 
-            _eventBus.Publish(new PlayerCreatedEvent(_characterMover));
+            _eventBus.Publish(new PlayerSpawnedEvent(_characterMover));
             
-            _logger.Success(SystemTag.Player, "Player spawned successfully.");
+            _logger.Success(LogTag.Player, "Player spawned successfully.");
+            
+            return new PlayerComponents(true, _playerSettings, _playerVisual, _characterMover, _characterEmotions);
         }
 
-        public void DestroyPlayer()
+        public void KillPlayer()
         {
-            if (_characterMover == null)
+            if (!_playerSpawner.Player.IsSpawned)
                 return;
             
             _gameplayInputEvents.OnPlayerMoveChanged -= OnPlayerMoveChanged;
             _gameplayInputEvents.Jump -= _playerMovementContext.RequestJump;
             
-            Object.Destroy(_characterMover.gameObject);
+            _playerSpawner.Kill();
             
             _characterMover = null;
             _playerMovementContext = null;
             _characterEmotionContext = null;
-            _eventBus.Publish(new PlayerDestroyedEvent());
+            _eventBus.Publish(new PlayerKilledEvent());
         }
         
         private void OnPlayerMoveChanged(Vector2 moveInput)
         {
-            var speed = _playerSettings.MoveSpeed * moveInput;
+            var motion = _playerSettings.MoveSpeed * moveInput;
             
-            _playerMovementContext.Speed.SetValue(speed);
+            _playerMovementContext.Motion.SetValue(motion);
         }
     }
 }

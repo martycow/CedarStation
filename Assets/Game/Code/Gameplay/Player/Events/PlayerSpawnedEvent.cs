@@ -2,11 +2,11 @@
 
 namespace Game.Gameplay
 {
-    public class PlayerCreatedEvent : IGameEvent
+    public class PlayerSpawnedEvent : IGameEvent
     {
         public readonly CharacterMover CharacterMover;
 
-        public PlayerCreatedEvent(CharacterMover characterMover)
+        public PlayerSpawnedEvent(CharacterMover characterMover)
         {
             CharacterMover = characterMover;
         }

@@ -1,6 +1,6 @@
-﻿namespace Cedar.Core
+﻿namespace Game.General
 {
-    public enum SystemTag
+    public enum LogTag
     {
         Application = 0,
         Container = 1,

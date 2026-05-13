@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Game.General;
 
-namespace Cedar.Core
+namespace Game.Core
 {
     public interface ICedarContainer : IInitializable, IDisposable
     {
