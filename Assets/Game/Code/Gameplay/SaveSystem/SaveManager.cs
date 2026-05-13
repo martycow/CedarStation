@@ -25,19 +25,27 @@ namespace Game.Gameplay
             LoadSlots();
         }
 
-        public SaveSlotData CreateEmptySlot(GameDifficulty difficulty, Vector3 spawnPosition, Quaternion spawnRotation)
+        public SaveSlotData CreateEmptySlot(GameDifficulty difficulty, Guid levelID, Vector3 spawnPosition, Quaternion spawnRotation)
         {
             var saveSlotID = Guid.NewGuid();
-            var startLevelID = Const.Level.DefaultLevelID;
             
-            var slotData = new SaveSlotData(saveSlotID, difficulty, startLevelID, spawnPosition, spawnRotation);
+            var slotData = new SaveSlotData(saveSlotID, difficulty, levelID, spawnPosition, spawnRotation);
             _slots.Add(saveSlotID, slotData);
             
-            _logger.Info(LogTag.Save, $"Created new empty save slot with difficulty {difficulty} (ID: {saveSlotID})");
+            _logger.Info(LogTag.Save, $"Created new empty save slot  (ID: {saveSlotID})");
             
             SaveSlots();
             
             return slotData;
+        }
+        
+        public SaveSlotData GetSlot(Guid slotID)
+        {
+            if (_slots.TryGetValue(slotID, out var slotData))
+                return slotData;
+            
+            _logger.Warn(LogTag.Save, $"Save slot with ID {slotID} not found.");
+            return null;
         }
 
         public void DeleteSlot(Guid slotID)

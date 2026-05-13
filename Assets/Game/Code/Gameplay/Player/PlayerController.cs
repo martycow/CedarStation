@@ -35,7 +35,7 @@ namespace Game.Gameplay
             
             if (_playerSpawner.Player.IsSpawned)
             {
-                _logger.Error(LogTag.Gameplay, "Player already exists.");
+                _logger.Error(LogTag.Player, "Player already exists.");
                 return PlayerComponents.Empty;
             }
 
@@ -63,8 +63,6 @@ namespace Game.Gameplay
             
             _characterEmotions.Setup(_characterEmotionContext, ContextViewUpdateType.OnSetup |
                                                                ContextViewUpdateType.EveryFrame);
-
-            _eventBus.Publish(new PlayerSpawnedEvent(_characterMover));
             
             _logger.Success(LogTag.Player, "Player spawned successfully.");
             

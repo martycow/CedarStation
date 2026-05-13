@@ -2,15 +2,14 @@
 {
     public enum LogTag
     {
-        Application = 0,
-        Container = 1,
-        Input = 2,
-        EventBus = 3,
-        Gameplay = 4,
-        Emotion = 5,
-        Data = 6,
-        Level = 7,
-        Save = 8,
-        Player = 9,
+        Application,
+        Container,
+        Input,
+        EventBus,
+        GameManager,
+        Emotion,
+        Level,
+        Save,
+        Player,
     }
 }

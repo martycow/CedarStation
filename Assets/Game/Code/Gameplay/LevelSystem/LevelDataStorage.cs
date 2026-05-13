@@ -1,30 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
+using Game.General;
 using UnityEngine;
 
 namespace Game.Gameplay
 {
     [CreateAssetMenu(menuName = "Cedar Station/Storage/Create Level Data Storage", fileName = "Storage_Level")]
-    public sealed class LevelDataStorage : ScriptableObject
+    public sealed class LevelDataStorage : ScriptableObject, IInitializable
     {
         [SerializeField]
         private LevelData[] levelDataArray;
-
-        public LevelData DefaultLevel => levelDataArray.Length > 0 ? levelDataArray[0] : null;
+        
         public readonly Dictionary<Guid, LevelData> LevelDataById = new();
-        public readonly Dictionary<string, LevelData> LevelDataByTechName = new();
 
-        public void Init()
+        private CedarLogger _logger;
+        
+        [Inject]
+        public void Inject(CedarLogger logger)
+        {
+            _logger = logger;
+        }
+        
+        public void Initialize()
         {
             LevelDataById.Clear();
-            LevelDataByTechName.Clear();
-            
-            for (var i = 0; i < levelDataArray.Length; i++)
+
+            if (levelDataArray == null || levelDataArray.Length == 0)
             {
-                var levelData = levelDataArray[i];
-                LevelDataById[levelData.ID] = levelData;
-                LevelDataByTechName[levelData.TechName] = levelData;
+                _logger.Error(LogTag.Level, "Level storage is empty.");
+                return;
             }
+            
+            foreach (var levelData in levelDataArray)
+                LevelDataById[levelData.ID] = levelData;
+        }
+        
+        public LevelData GetFirstLevel()
+        {
+            if (levelDataArray.Length > 0)
+                return levelDataArray[0];
+
+            _logger.Error(LogTag.Level,"Level storage is empty.");
+            return null;
         }
     }
 }

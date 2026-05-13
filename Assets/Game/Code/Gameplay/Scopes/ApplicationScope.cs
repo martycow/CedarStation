@@ -37,9 +37,7 @@ namespace Game.Gameplay
             // For now - load Game scene and stuff
             Utilities.Scenes.Load(Const.Scope.GameplayScope);
             
-            logger.Line();
             logger.Success(LogTag.Application, $"{Application.productName} started.");
-            logger.Line();
         }
 
         private void OnDestroy()
@@ -52,8 +50,8 @@ namespace Game.Gameplay
             _inputActions?.Dispose();
             Container?.Dispose();
         }
-        
-        public ICedarContainer CreateAndInitContainer(CedarLogger logger,  ICedarContainer parent)
+
+        private ICedarContainer CreateAndInitContainer(CedarLogger logger, ICedarContainer parent)
         {
             _inputActions = new InputActions();
 
@@ -69,7 +67,7 @@ namespace Game.Gameplay
             return container;
         }
 
-        public ICedarContainerBuilder CreateBuilder(string containerName, CedarLogger logger, ICedarContainer parent = null)
+        private ICedarContainerBuilder CreateBuilder(string containerName, CedarLogger logger, ICedarContainer parent = null)
         {
             var builder = new CedarContainerBuilder(containerName, logger, parent);
 

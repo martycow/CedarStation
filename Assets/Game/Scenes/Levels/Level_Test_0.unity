@@ -1900,9 +1900,9 @@ MonoBehaviour:
         z: 0.61073196
       Rotation:
         value:
-          x: 0.01798743
+          x: 0.017987434
           y: 0.46103677
-          z: 0.007532505
+          z: 0.007532504
           w: 0.8871667
     - Position:
         x: 10.016157
@@ -2159,7 +2159,7 @@ GameObject:
   - component: {fileID: 1926358572}
   - component: {fileID: 1926358573}
   m_Layer: 0
-  m_Name: Level
+  m_Name: LevelSceneRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2189,11 +2189,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1926358570}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac0838ddfa2c4da3b9b2cb5fab9773bb, type: 3}
+  m_Script: {fileID: 11500000, guid: 96c781e280cf5d2409aa0975939bdb4a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.Level
-  cinemachineCamera: {fileID: 0}
-  spawnedVolumeBoxes: []
+  m_EditorClassIdentifier: Game.Gameplay::Game.Gameplay.LevelSceneRoot
+  cinemachineCamera: {fileID: 1382433631}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

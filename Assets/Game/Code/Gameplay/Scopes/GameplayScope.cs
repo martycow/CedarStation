@@ -32,37 +32,32 @@ namespace Game.Gameplay
                 Debug.LogError("Application Scope not found in the scene.");
                 return;
             }
-
-            // Creating container for Gameplay purposes
+            
             var logger = appScope.Container.Resolve<CedarLogger>();
             Container = CreateAndInitContainer(logger, appScope.Container);
+
+            var gameManager = Container.Resolve<GameManager>();
+            gameManager.StartNewGame(GameDifficulty.Normal);
         }
 
         private void OnDestroy()
         {
-            Dispose();
-        }
-
-        public void Dispose()
-        {
             Container?.Dispose();
         }
-        
-        public ICedarContainer CreateAndInitContainer(CedarLogger logger, ICedarContainer parent)
+
+        private ICedarContainer CreateAndInitContainer(CedarLogger logger, ICedarContainer parent)
         {
             var builder = CreateBuilder(Const.Scope.GameplayScope, logger, parent);
             var container = builder.Build();
             
-            // Injecting dependencies into MonoBehaviours
-            var monoBehaviours = FindObjectsByType<MonoBehaviour>();
-            foreach (var instance in monoBehaviours)
-                container.Inject(instance);
+            InjectMonoBehaviours(container);
+            InjectScriptableObjects(container);
             
             container.Initialize();
             return container;
         }
 
-        public ICedarContainerBuilder CreateBuilder(string containerName, CedarLogger logger, ICedarContainer parent)
+        private ICedarContainerBuilder CreateBuilder(string containerName, CedarLogger logger, ICedarContainer parent)
         {
             var builder = new CedarContainerBuilder(containerName, logger, parent);
 
@@ -77,7 +72,7 @@ namespace Game.Gameplay
             
             // Level management
             builder.RegisterInstance(levelDataStorage);
-            levelDataStorage.Init();
+            levelDataStorage.Initialize();
             builder.Register<LevelManager>();
             
             // Camera
@@ -88,6 +83,22 @@ namespace Game.Gameplay
             builder.Register<GameManager>();
 
             return builder;
+        }
+        
+        private void InjectMonoBehaviours(ICedarContainer container)
+        {
+            // Injecting dependencies into MonoBehaviours
+            var monoBehaviours = FindObjectsByType<MonoBehaviour>();
+            foreach (var instance in monoBehaviours)
+                container.Inject(instance);
+        }
+
+        private void InjectScriptableObjects(ICedarContainer container)
+        {
+            // Injecting dependencies into scriptable objects
+            container.Inject(playerSettings);
+            container.Inject(levelDataStorage);
+            container.Inject(saveSystemSettings);
         }
     }
 }
