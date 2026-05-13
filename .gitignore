@@ -78,4 +78,7 @@ crashlytics-build.properties
 *_bak*.hip
 *_bak*.hipnc
 
-*.DS_Store.claude/settings.local.json
+*.DS_Store
+
+// Claude stuff
+.claude/settings.local.json
