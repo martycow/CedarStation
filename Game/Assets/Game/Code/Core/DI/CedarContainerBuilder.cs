@@ -1,0 +1,49 @@
+﻿using System.Collections.Generic;
+using Game.General;
+
+namespace Game.Core
+{
+    public sealed class CedarContainerBuilder : ICedarContainerBuilder
+    {
+        public IEnumerable<IDependency> Dependencies => _dependencies;
+        
+        private readonly List<IDependency> _dependencies = new();
+        private readonly string _containerName;
+        private readonly CedarLogger _logger;
+        private readonly ICedarContainer _parent;
+
+        public CedarContainerBuilder(string containerName, CedarLogger cedarLogger, ICedarContainer parent)
+        {
+            _containerName = containerName;
+            _logger = cedarLogger;
+            _parent = parent;
+        }
+
+        public ICedarContainerBuilder Register<T>(DependencyLifetime lifetime = DependencyLifetime.Singleton)
+        {
+            return Register<T, T>(lifetime);
+        }
+        
+        public ICedarContainerBuilder Register<TContract, TImplementation>(DependencyLifetime lifetime = DependencyLifetime.Singleton) where TImplementation : TContract
+        {
+            var info = new Dependency(typeof(TContract), typeof(TImplementation), lifetime, _logger);
+            
+            _dependencies.Add(info);
+            return this;
+        }
+        
+        public ICedarContainerBuilder RegisterInstance<TContract>(TContract instance)
+        {
+            var info = new Dependency(typeof(TContract), instance.GetType(), DependencyLifetime.Singleton, _logger);
+            info.SetSingletonInstance(instance);
+            
+            _dependencies.Add(info);
+            return this;
+        }
+
+        public ICedarContainer Build()
+        {
+            return new CedarContainer(_containerName, _dependencies, _logger, _parent);
+        }
+    }
+}
