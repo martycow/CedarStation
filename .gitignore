@@ -7,9 +7,9 @@
 **/[Uu]ser[Ss]ettings/
 
 # Project local folder
-**/[ConceptArt]/
-**/[References]/
-**/[Screenshots]/
+**/[Cc]onceptArt/
+**/[Rr]eferences/
+**/[Ss]creenshots/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
