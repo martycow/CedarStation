@@ -1,0 +1,25 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="8pITAIPf-pY-L7tLUVDO">
+    <mxGraphModel dx="462" dy="473" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Okhlj96Cn8V_XvIzTLad-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Core" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="Okhlj96Cn8V_XvIzTLad-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Editor" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="Okhlj96Cn8V_XvIzTLad-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Gameplay" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="Okhlj96Cn8V_XvIzTLad-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="General" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="Okhlj96Cn8V_XvIzTLad-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Input" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="360" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
