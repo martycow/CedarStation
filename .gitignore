@@ -6,11 +6,12 @@
 **/[Ll]ogs/
 **/[Uu]ser[Ss]ettings/
 
-# Project local folder
+# Project local folders
 **/[Cc]onceptArt/
+**/[Dd]ocs/
+**/[Mm]isc/
 **/[Rr]eferences/
 **/[Ss]creenshots/
-**/[Mm]isc/
 
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
