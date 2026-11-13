@@ -81,6 +81,55 @@ namespace Game.Gameplay
                 _logger.Error(LogTag.GameManager, $"Exception: {e}");
             }
         }
+
+#if UNITY_EDITOR
+        public async void StartDevGame(string scenePath, Vector3? spawnPosition)
+        {
+            try
+            {
+                if (_gameContext != null)
+                {
+                    _logger.Fail(LogTag.GameManager, "Game context already exists. Cannot start a dev game.");
+                    return;
+                }
+
+                _logger.Line();
+                _logger.Info(LogTag.GameManager, $"Starting dev game in {scenePath}.");
+
+                var levelComponents = await _levelManager.LoadLevelFromPath(scenePath);
+                if (!levelComponents.IsLoaded)
+                    return;
+
+                var position = spawnPosition ?? GetDefaultSpawnPosition(levelComponents);
+
+                // Temporary slot: not registered in SaveManager, never written to disk
+                var devSlot = new SaveSlotData(
+                    Guid.NewGuid(),
+                    GameDifficulty.Normal,
+                    levelComponents.Data.ID,
+                    position,
+                    Quaternion.identity);
+
+                var gameContext = StartGameInLevel(devSlot, levelComponents);
+                _gameContext = gameContext;
+                _eventBus.Publish(new GameStartedEvent(gameContext));
+            }
+            catch (Exception e)
+            {
+                _logger.Error(LogTag.GameManager, $"Exception: {e}");
+            }
+        }
+
+        private Vector3 GetDefaultSpawnPosition(LevelComponents levelComponents)
+        {
+            var spawnZones = levelComponents.Data.PlayerSpawnZones;
+            if (spawnZones != null && spawnZones.Length > 0)
+                return spawnZones[Random.Range(0, spawnZones.Length)].GetRandomPosition();
+
+            _logger.Warn(LogTag.GameManager, $"Level {levelComponents.Data.DisplayName} has no player spawn zones. Spawning at LevelSceneRoot position.");
+            return levelComponents.SceneRoot.transform.position;
+        }
+#endif
         
         public async void LoadGame(Guid saveSlotID)
         {
@@ -111,25 +160,28 @@ namespace Game.Gameplay
                 if (!levelComponents.IsLoaded) 
                     return (false, null);
                 
-                _logger.Success(LogTag.GameManager, $"Level {levelComponents.Data.DisplayName} loaded successfully.");
-                
-                _inputManager.SetState(InputStateType.Gameplay);
-                var playerComponents = _playerController.SpawnPlayer(saveSlotData.SpawnPosition, saveSlotData.SpawnRotation);
-                
-                var gameContext = new GameContext
-                {
-                    SaveSlot = saveSlotData,
-                    Level = levelComponents,
-                    Player = playerComponents
-                };
-                
-                return (true, gameContext);
+                return (true, StartGameInLevel(saveSlotData, levelComponents));
             }
             catch (Exception e)
             {
                 _logger.Error(LogTag.GameManager, $"Exception: {e}");
                 return (false, null);
             }
+        }
+
+        private GameContext StartGameInLevel(SaveSlotData saveSlotData, LevelComponents levelComponents)
+        {
+            _logger.Success(LogTag.GameManager, $"Level {levelComponents.Data.DisplayName} loaded successfully.");
+
+            _inputManager.SetState(InputStateType.Gameplay);
+            var playerComponents = _playerController.SpawnPlayer(saveSlotData.SpawnPosition, saveSlotData.SpawnRotation);
+
+            return new GameContext
+            {
+                SaveSlot = saveSlotData,
+                Level = levelComponents,
+                Player = playerComponents
+            };
         }
     }
 }

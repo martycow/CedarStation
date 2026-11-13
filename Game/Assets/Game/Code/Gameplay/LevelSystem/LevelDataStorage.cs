@@ -35,6 +35,21 @@ namespace Game.Gameplay
                 LevelDataById[levelData.ID] = levelData;
         }
         
+        public bool TryGetBySceneName(string sceneName, out LevelData levelData)
+        {
+            foreach (var data in LevelDataById.Values)
+            {
+                if (data.SceneName == sceneName)
+                {
+                    levelData = data;
+                    return true;
+                }
+            }
+
+            levelData = null;
+            return false;
+        }
+
         public LevelData GetFirstLevel()
         {
             if (levelDataArray.Length > 0)

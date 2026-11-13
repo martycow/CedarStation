@@ -33,6 +33,47 @@ namespace Game.Gameplay
                 return LevelComponents.Fail();
             }
 
+            return await LoadLevelInternal(levelData, () => Utilities.Scenes.LoadAsync(levelData.SceneName));
+        }
+
+#if UNITY_EDITOR
+        public async Task<LevelComponents> LoadLevelFromPath(string scenePath)
+        {
+            var sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
+
+            if (!_levelDataStorage.TryGetBySceneName(sceneName, out var levelData))
+            {
+                _logger.Warn(LogTag.Level, $"Scene {sceneName} is not registered in level storage. Using temporary level data.");
+                levelData = new LevelData(Guid.NewGuid(), sceneName, LevelType.Test)
+                {
+                    DisplayName = sceneName,
+                    SceneName = sceneName
+                };
+            }
+
+            return await LoadLevelInternal(levelData, () => LoadSceneByPathAsync(scenePath));
+        }
+
+        private static async Task<Scene> LoadSceneByPathAsync(string scenePath)
+        {
+            var scene = SceneManager.GetSceneByPath(scenePath);
+            if (scene.isLoaded)
+                return scene;
+
+            var parameters = new LoadSceneParameters(LoadSceneMode.Additive);
+            var operation = UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode(scenePath, parameters);
+
+            while (operation != null && !operation.isDone)
+                await Task.Yield();
+
+            return SceneManager.GetSceneByPath(scenePath);
+        }
+#endif
+
+        private async Task<LevelComponents> LoadLevelInternal(LevelData levelData, Func<Task<Scene>> loadScene)
+        {
+            var levelID = (Guid)levelData.ID;
+
             if (_currentScene.isLoaded && _currentLevelData != null && _currentLevelData.ID == levelID)
             {
                 _logger.Warn(LogTag.Level, $"Level with ID {levelID} is already loaded.");
@@ -59,7 +100,13 @@ namespace Game.Gameplay
             else
             {
                 _logger.Info(LogTag.Level, $"Loading scene {levelData.SceneName}...");
-                var scene = await Utilities.Scenes.LoadAsync(levelData.SceneName);
+                var scene = await loadScene();
+                if (!scene.IsValid() || !scene.isLoaded)
+                {
+                    _logger.Error(LogTag.Level, $"Failed to load scene {levelData.SceneName}.");
+                    return LevelComponents.Fail();
+                }
+
                 _logger.Info(LogTag.Level, "Scene loaded. Searching for LevelSceneRoot...");
 
                 LevelSceneRoot sceneRoot = null;
@@ -79,9 +126,7 @@ namespace Game.Gameplay
                 var levelGo = new GameObject("Level");
                 SceneManager.MoveGameObjectToScene(levelGo, scene);
                 var level = levelGo.AddComponent<Level>();
-
-                var data = new LevelData(levelData.ID, levelData.TechName, levelData.SubType);
-                level.Setup(data, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
+                level.Setup(levelData, ContextViewUpdateType.OnSetup | ContextViewUpdateType.EveryFrame);
 
                 _currentScene = scene;
                 _currentLevel = level;
