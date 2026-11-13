@@ -55,8 +55,7 @@ namespace Game.Gameplay
             _gameplayInputEvents.Jump += _playerMovementContext.RequestJump;
             
             _characterMover.Setup(_playerMovementContext, ContextViewUpdateType.OnSetup | 
-                                                          ContextViewUpdateType.EveryFrame | 
-                                                          ContextViewUpdateType.EveryFixedUpdate);
+                                                          ContextViewUpdateType.EveryFrame);
             
             // Emotions
             _characterEmotionContext = new CharacterEmotionContext(_playerVisual, _logger);
