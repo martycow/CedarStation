@@ -1,6 +1,7 @@
 ﻿using Game.Core;
 using Game.General;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Game.Gameplay
 {
@@ -36,6 +37,14 @@ namespace Game.Gameplay
             }
             
             _characterMover = Object.Instantiate(_playerSettings.CharacterMoverPrefab, spawnPos, spawnRot);
+            
+            // Move player to Gameplay scene
+            var gameplayScene = SceneManager.GetSceneByName(Const.Scope.GameplayScope);
+            if (gameplayScene.isLoaded)
+                SceneManager.MoveGameObjectToScene(_characterMover.gameObject, gameplayScene);
+            else
+                _logger.Warn(LogTag.Player, $"Scene {Const.Scope.GameplayScope} is not loaded. Player stays in the active scene.");
+
             _playerVisual = _characterMover.GetComponent<CharacterVisual>();
             _characterEmotions = _characterMover.GetComponent<CharacterEmotions>();
             _spawned = true;

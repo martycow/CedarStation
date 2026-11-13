@@ -1,9 +1,11 @@
 ﻿using System;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Game.General
 {
     [Serializable]
+    [JsonConverter(typeof(SerializableGuidJsonConverter))]
     public struct SerializableGuid : IEquatable<SerializableGuid>
     {
         [SerializeField] 

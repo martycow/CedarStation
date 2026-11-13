@@ -1,49 +1,34 @@
 using Game.Gameplay;
 using UnityEditor;
 using UnityEditor.SceneManagement;
-using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Editor
 {
+    /// <summary>
+    /// Editor side of "Play from any scene". The actual boot redirect happens at runtime in <see cref="DevLaunch"/>.
+    /// </summary>
     [InitializeOnLoad]
     public static class PlayModeBootstrapper
     {
-        private const string ApplicationScenePath = "Assets/Game/Scenes/Application.unity";
-        private const string DefaultStartupKey = "Cedar.PlayFromScene.DefaultStartup";
-        private const string MenuPath = "Cedar Station/Always start from Application";
-        
+        private const string MenuPath = "Cedar Station/Play From Current Scene";
+
         static PlayModeBootstrapper()
         {
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-            EditorApplication.delayCall += Apply;
-        }
-
-        private static bool DefaultStartup
-        {
-            get => EditorPrefs.GetBool(DefaultStartupKey, true);
-            set => EditorPrefs.SetBool(DefaultStartupKey, value);
+            EditorApplication.delayCall += () => EditorSceneManager.playModeStartScene = null;
         }
 
         [MenuItem(MenuPath)]
         private static void Toggle()
         {
-            DefaultStartup = !DefaultStartup;
-            Apply();
+            DevLaunch.Enabled = !DevLaunch.Enabled;
         }
 
         [MenuItem(MenuPath, true)]
         private static bool ToggleValidation()
         {
-            Menu.SetChecked(MenuPath, DefaultStartup);
+            Menu.SetChecked(MenuPath, DevLaunch.Enabled);
             return true;
-        }
-        
-        private static void Apply()
-        {
-            EditorSceneManager.playModeStartScene = DefaultStartup
-                ? AssetDatabase.LoadAssetAtPath<SceneAsset>(ApplicationScenePath)
-                : null;
         }
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
@@ -51,29 +36,14 @@ namespace Editor
             if (state != PlayModeStateChange.ExitingEditMode)
                 return;
 
-            Apply();
             DevLaunch.Clear();
 
-            if (!DefaultStartup)
+            if (!DevLaunch.Enabled)
                 return;
 
-            var scene = SceneManager.GetActiveScene();
-            if (scene.path == ApplicationScenePath || !scene.path.Contains("/Levels/"))
-                return;
-
-            // The level is loaded from disk in Play Mode, so unsaved edits wouldn't be there
+            // The level is reloaded from disk in Play Mode, so unsaved edits wouldn't be there
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-            {
                 EditorApplication.isPlaying = false;
-                return;
-            }
-
-            DevLaunch.Write(scene.path, GetSceneViewSpawn());
-        }
-
-        private static Vector3? GetSceneViewSpawn()
-        {
-            return null;
         }
     }
 }

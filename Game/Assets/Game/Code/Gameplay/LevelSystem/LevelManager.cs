@@ -135,6 +135,9 @@ namespace Game.Gameplay
                 _loadedLevels[levelID] = LevelComponents.Success(scene, level, sceneRoot, levelData);
             }
 
+            // New objects are now created on this level by default
+            SceneManager.SetActiveScene(_currentScene);
+
             return new LevelComponents(true, _currentScene, _currentLevel, _currentSceneRoot, _currentLevelData);
         }
 

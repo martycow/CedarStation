@@ -37,6 +37,15 @@ namespace Game.Gameplay
             Container = CreateAndInitContainer(logger, appScope.Container);
 
             var gameManager = Container.Resolve<GameManager>();
+
+#if UNITY_EDITOR
+            if (DevLaunch.TryRead(out var scenePath, out var spawn))
+            {
+                gameManager.StartDevGame(scenePath, spawn);
+                return;
+            }
+#endif
+            
             gameManager.StartNewGame(GameDifficulty.Normal);
         }
 
