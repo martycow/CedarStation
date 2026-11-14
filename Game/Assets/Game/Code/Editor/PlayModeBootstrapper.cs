@@ -1,6 +1,7 @@
 using Game.Gameplay;
 using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 
 namespace Editor
 {
@@ -10,7 +11,7 @@ namespace Editor
     [InitializeOnLoad]
     public static class PlayModeBootstrapper
     {
-        private const string MenuPath = "Cedar Station/Play From Current Scene";
+        private const string MenuPath = "Cedar Station/Start In Opened Level";
 
         static PlayModeBootstrapper()
         {
@@ -41,9 +42,49 @@ namespace Editor
             if (!DevLaunch.Enabled)
                 return;
 
+            var levelScenePath = FindOpenedLevelPath();
+            if (levelScenePath == null)
+                return;
+
             // The level is reloaded from disk in Play Mode, so unsaved edits wouldn't be there
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
                 EditorApplication.isPlaying = false;
+                return;
+            }
+
+            DevLaunch.Write(levelScenePath, null);
+        }
+
+        // Active scene first, then any other opened scene with a LevelSceneRoot on a root object
+        private static string FindOpenedLevelPath()
+        {
+            var active = SceneManager.GetActiveScene();
+            if (IsLevel(active))
+                return active.path;
+
+            for (var i = 0; i < SceneManager.sceneCount; i++)
+            {
+                var scene = SceneManager.GetSceneAt(i);
+                if (IsLevel(scene))
+                    return scene.path;
+            }
+
+            return null;
+        }
+
+        private static bool IsLevel(Scene scene)
+        {
+            if (!scene.isLoaded || string.IsNullOrEmpty(scene.path))
+                return false;
+
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                if (root.GetComponent<LevelSceneRoot>() != null)
+                    return true;
+            }
+
+            return false;
         }
     }
 }
